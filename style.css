@@ -61,7 +61,7 @@ h1 {
   text-transform: uppercase;
 }
 
-.button_reset {
+.button {
   font-size: 1.2rem;
   font-weight: 700;
   cursor: pointer;
@@ -70,7 +70,7 @@ h1 {
   padding: 12px 24px;
 }
 
-.button_reset:hover {
+.button:hover {
   transform: scale(1.1);
   transition: .1s;
 }

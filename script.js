@@ -59,6 +59,9 @@ const DisplayController = (() => {
   const resultElement = document.querySelector('.result');
   const startButton = document.querySelector('.button_start');
   const resetButton = document.querySelector('.button_reset');
+  const formContainer = document.querySelector('.form_container');
+  const player1Input = document.querySelector('#player1_name');
+  const player2Input = document.querySelector('#player2_name');
 
   const _determineMarkerColor = (marker) => {
     return marker === 'x' ? 'indigo' : 'yellow';
@@ -98,7 +101,17 @@ const DisplayController = (() => {
     resetButton.classList.remove('hidden');
   };
 
-  return { renderBoard, showGameResult, boardElement, resultElement, startButton, resetButton };
+  return { 
+           renderBoard,
+           showGameResult,
+           boardElement, 
+           resultElement, 
+           formContainer,
+           player1Input,
+           player2Input,
+           startButton, 
+           resetButton, 
+          };
 })();
 
 // tells Gameboard where to mark
@@ -159,9 +172,13 @@ const startNewGame = () => {
   DisplayController.renderBoard();
 };
 
-let currentGame = game();
+let currentGame;
 DisplayController.startButton.addEventListener('click', () => {
   DisplayController.startButton.classList.add('hidden');
+  DisplayController.formContainer.classList.add('hidden');
+  const player1Name = DisplayController.player1Input.value || 'Player1';
+  const player2Name = DisplayController.player2Input.value || 'Player2';
+  currentGame = game(player('x', player1Name), player('o', player2Name));
   DisplayController.renderBoard();
 });
 
