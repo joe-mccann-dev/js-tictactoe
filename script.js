@@ -57,6 +57,7 @@ const Gameboard =
 const DisplayController = (() => {
   const boardElement = document.getElementById('gameboard');
   const resultElement = document.querySelector('.result');
+  const startButton = document.querySelector('.button_start');
   const resetButton = document.querySelector('.button_reset');
 
   const _determineMarkerColor = (marker) => {
@@ -97,7 +98,7 @@ const DisplayController = (() => {
     resetButton.classList.remove('hidden');
   };
 
-  return { renderBoard, showGameResult, boardElement, resultElement, resetButton };
+  return { renderBoard, showGameResult, boardElement, resultElement, startButton, resetButton };
 })();
 
 // tells Gameboard where to mark
@@ -159,10 +160,8 @@ const startNewGame = () => {
 };
 
 let currentGame = game();
-
-const startButton = document.querySelector('.button_start');
-startButton.addEventListener('click', () => {
-  startButton.classList.add('hidden');
+DisplayController.startButton.addEventListener('click', () => {
+  DisplayController.startButton.classList.add('hidden');
   DisplayController.renderBoard();
 });
 
