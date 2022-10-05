@@ -159,5 +159,11 @@ const startNewGame = () => {
 };
 
 let currentGame = game();
-DisplayController.renderBoard();
+
+const startButton = document.querySelector('.button_start');
+startButton.addEventListener('click', () => {
+  startButton.classList.add('hidden');
+  DisplayController.renderBoard();
+});
+
 DisplayController.resetButton.addEventListener('click', startNewGame);
