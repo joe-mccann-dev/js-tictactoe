@@ -57,9 +57,9 @@ const Gameboard =
 const DisplayController = (() => {
   const boardElement = document.getElementById('gameboard');
   const resultElement = document.querySelector('.result');
-  const startButton = document.querySelector('.button_start');
   const resetButton = document.querySelector('.button_reset');
   const formContainer = document.querySelector('.form_container');
+  const form = document.querySelector('#form');
   const player1Input = document.querySelector('#player1_name');
   const player2Input = document.querySelector('#player2_name');
 
@@ -105,11 +105,11 @@ const DisplayController = (() => {
            renderBoard,
            showGameResult,
            boardElement, 
-           resultElement, 
+           resultElement,
            formContainer,
+           form,
            player1Input,
            player2Input,
-           startButton, 
            resetButton, 
           };
 })();
@@ -160,11 +160,11 @@ const game = (
 
   const isOver = () => winnerExists() || isTied();
 
-  return { update, currentPlayerMarker, setCurrentPlayer, isOver, currentPlayer };
+  return { update, currentPlayerMarker, setCurrentPlayer, isOver, currentPlayer, player1, player2 };
 };
 
 const startNewGame = () => {
-  currentGame = game();
+  currentGame = game(currentGame.player1, currentGame.player2);
   Gameboard.reset();
   DisplayController.resetButton.classList.add('hidden');
   DisplayController.resultElement.classList.add('hidden');
@@ -173,8 +173,7 @@ const startNewGame = () => {
 };
 
 let currentGame;
-DisplayController.startButton.addEventListener('click', () => {
-  DisplayController.startButton.classList.add('hidden');
+DisplayController.form.addEventListener('submit', () => {
   DisplayController.formContainer.classList.add('hidden');
   const player1Name = DisplayController.player1Input.value || 'Player1';
   const player2Name = DisplayController.player2Input.value || 'Player2';

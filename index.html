@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,28 +8,31 @@
   <title>Tic Tac Toe</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-<h1>Tic Tac Toe</h1>
-<div class="form_container">
-  <fieldset>
-    <legend>Enter player names to begin</legend>
-    <div class="field">
-      <label for="player1_name">Player1 Name</label>
-      <input type="text" id="player1_name" required>
-    </div>
-    <div class="field">
-      <label for="player2_name">Player2 Name</label>
-      <input type="text" id="player2_name" required>
-    </div>
-    <div class="field">
-      <button type="button" class="button button_start">start</button>
-    </div>
-  </fieldset>
-</div>
-<div id="gameboard" class="hidden">
-</div>
-<p class="result hidden">Draw</p>
-<button type="button" class="button button_reset hidden">PLAY AGAIN</button>
-<script src="script.js"></script>
+  <h1>Tic Tac Toe</h1>
+  <div class="form_container">
+    <form id="form" class="form" action="#">
+      <fieldset>
+        <legend>Enter player names (optional)</legend>
+        <div class="field">
+          <label for="player1_name">Player1</label>
+          <input type="text" id="player1_name">
+        </div>
+        <div class="field">
+          <label for="player2_name">Player2</label>
+          <input type="text" id="player2_name">
+        </div>
+        <div class="field">
+          <input type="submit" class="button button_start" value="Start Game"></input>
+        </div>
+      </fieldset>
+    </form>
+  </div>
+  <div id="gameboard" class="hidden"></div>
+  <p class="result hidden">Draw</p>
+  <button type="button" class="button button_reset hidden">PLAY AGAIN</button>
+  <script src="script.js"></script>
 </body>
+
 </html>
