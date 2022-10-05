@@ -99,6 +99,12 @@ const DisplayController = (() => {
     const resultElement = document.querySelector('.result');
     resultElement.textContent = result;
     resultElement.classList.remove('hidden');
+    showResetButton();
+  };
+
+  const showResetButton = () => {
+    const resetButton = document.querySelector('.button_reset');
+    resetButton.classList.remove('hidden');
   };
 
   return { renderBoard, showGameResult };
@@ -127,7 +133,7 @@ const game = (
   const update = (index) => {
     currentPlayer.markBoard(index);
     if (winnerExists()) { result = `${currentPlayer.name} wins!`; }
-    if (isOver()) { DisplayController.showGameResult(result); }
+    if (isOver()) { DisplayController.showGameResult(result); console.log(result) }
     setCurrentPlayer();
   };
 
