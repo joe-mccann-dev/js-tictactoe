@@ -160,7 +160,15 @@ const game = (
 
   const isOver = () => winnerExists() || isTied();
 
-  return { update, currentPlayerMarker, setCurrentPlayer, isOver, currentPlayer, player1, player2 };
+  return { 
+    update,
+    currentPlayerMarker,
+    setCurrentPlayer,
+    isOver,
+    currentPlayer,
+    player1,
+    player2
+  };
 };
 
 const startNewGame = () => {
