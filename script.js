@@ -32,7 +32,7 @@ const Gameboard =
         return (
           winLines.some(line => {
             return [cells[line[0]], cells[line[1]], cells[line[2]]]
-              .every(c => c === 'x')
+              .every(c => c === 'x');
           })
         );
       };
@@ -41,7 +41,7 @@ const Gameboard =
         return (
           winLines.some(line => {
             return [cells[line[0]], cells[line[1]], cells[line[2]]]
-              .every(c => c === 'o')
+              .every(c => c === 'o');
           })
         );
       };
@@ -52,7 +52,7 @@ const Gameboard =
         if (cells[index] === '') { cells[index] = marker; }
       };
 
-      return { cells, update, lineOfX, lineOfO, isFull }
+      return { cells, update, lineOfX, lineOfO, isFull };
     })();
 
 // controls DOM manipulation
@@ -61,7 +61,7 @@ const DisplayController = (() => {
   const boardElement = document.getElementById('gameboard');
 
   const _determineMarkerColor = (marker) => {
-    return marker === 'x' ? 'indigo' : 'yellow'
+    return marker === 'x' ? 'indigo' : 'yellow';
   }
 
   const _setColor = (cellElement, marker) => {
@@ -82,7 +82,7 @@ const DisplayController = (() => {
   };
 
   const updateCellElement = (e) => {
-    const index = e.target.id
+    const index = e.target.id;
     if (Gameboard.cells[index] !== '' || currentGame.isOver()) {
       return;
     }
@@ -101,7 +101,7 @@ const DisplayController = (() => {
     resultElement.classList.remove('hidden');
   };
 
-  return { renderBoard, showGameResult }
+  return { renderBoard, showGameResult };
 })();
 
 // tells Gameboard where to mark
@@ -109,7 +109,7 @@ const DisplayController = (() => {
 const player = (marker, name) => {
   const markBoard = (index) => Gameboard.update(marker, index);
 
-  return { markBoard, marker, name }
+  return { markBoard, marker, name };
 };
 
 // contains logic of tic tac toe
@@ -145,13 +145,13 @@ const game = (
   const player2Wins = () => Gameboard.lineOfO();
 
   const isTied = () => {
-    return Gameboard.isFull() && (!Gameboard.lineOfX() && !Gameboard.lineOfO())
+    return Gameboard.isFull() && (!Gameboard.lineOfX() && !Gameboard.lineOfO());
   };
 
   const isOver = () => winnerExists() || isTied();
 
-  return { update, currentPlayerMarker, setCurrentPlayer, isOver, currentPlayer }
+  return { update, currentPlayerMarker, setCurrentPlayer, isOver, currentPlayer };
 };
 
-let currentGame = game()
+let currentGame = game();
 DisplayController.renderBoard(Gameboard);
