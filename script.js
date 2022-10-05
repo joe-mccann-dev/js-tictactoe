@@ -46,9 +46,7 @@ const Gameboard =
         );
       };
 
-      const isFull = () => {
-        return (cells.every(c => c !== ''));
-      };
+      const isFull = () => cells.every(c => c !== '');
 
       const update = (marker, index) => {
         if (cells[index] === '') { cells[index] = marker; }
@@ -110,7 +108,7 @@ const DisplayController = (() => {
 // has marker (string) attribute
 const player = (marker, name) => {
   const markBoard = (index) => Gameboard.update(marker, index);
-  
+
   return { markBoard, marker, name }
 };
 
@@ -150,12 +148,9 @@ const game = (
     return Gameboard.isFull() && (!Gameboard.lineOfX() && !Gameboard.lineOfO())
   };
 
-  const isOver = () => {
-    return (winnerExists() || isTied()) 
-  };
+  const isOver = () => winnerExists() || isTied();
 
   return { update, currentPlayerMarker, setCurrentPlayer, isOver, currentPlayer }
-
 };
 
 let currentGame = game()
