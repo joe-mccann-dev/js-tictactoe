@@ -118,7 +118,14 @@ const DisplayController = (() => {
 const player = (marker, name) => {
   const markBoard = (index) => Gameboard.update(marker, index);
 
-  return { markBoard, marker, name };
+  const score = {
+    wins: 0,
+    incrementWins: () => {
+      score.wins += 1;
+    }
+  }
+
+  return { markBoard, marker, name, score };
 };
 
 // contains logic of tic tac toe
@@ -130,12 +137,17 @@ const game = (
   player2 = player('o', 'player2'),
 ) => {
 
+  
   let currentPlayer = player1;
   let result = 'draw';
 
   const update = (index) => {
     currentPlayer.markBoard(index);
-    if (winnerExists()) { result = `${currentPlayer.name} wins!`; }
+    if (winnerExists()) { 
+      result = `${currentPlayer.name} wins!`;
+      currentPlayer.score.incrementWins();
+      console.log("current player wins: ", currentPlayer.score.wins)
+    }
     if (isOver()) { DisplayController.showGameResult(result) }
     setCurrentPlayer();
   };
