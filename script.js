@@ -69,8 +69,8 @@ const DisplayController = (() => {
     cellElement.classList.add(color);
   };
 
-  const renderBoard = (board) => {
-    board.cells.forEach((marker, index) => {
+  const renderBoard = () => {
+    Gameboard.cells.forEach((marker, index) => {
       const cellElement = document.createElement('div');
       _setColor(cellElement, marker);
       cellElement.classList.add('marker_container');
@@ -160,4 +160,4 @@ const game = (
 };
 
 let currentGame = game();
-DisplayController.renderBoard(Gameboard);
+DisplayController.renderBoard();
