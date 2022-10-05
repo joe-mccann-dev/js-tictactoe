@@ -1,11 +1,19 @@
-// modules: [displayController, Gameboard]
+// modules = [Gameboard, DisplayController];
+// factories = [player, game];
 
-// contains the current board state
-// option to pass in updated board for testing purposes
+// MESSAGE FLOW:
+// DisplayController listens for a message from player
+// player clicks DOM element => 
+// DisplayController updates DOM =>
+// DisplayController sends message to game (currentGame.update) => 
+// currentPlayer sends update message to Gameboard (currentPlayer.markBoard))
+
+// contains the current board state, option to pass in updated board
+// for testing purposes:
 // const testBoard = ['', '', 'x', '', '', 'x', '', '', 'x'];
 // const xWins = ['x', 'o', 'x', 'o', 'x', 'o', 'x', 'o', 'x'];
 // const oWins = ['x', 'o', 'x', 'o', 'o', 'x', 'x', 'o', ''];
-const tied = ['o', 'o', 'x', 'x', 'x', 'o', 'o', 'x', 'x']
+// const tied = ['o', 'o', 'x', 'x', 'x', 'o', 'o', 'x', 'x']
 const Gameboard =
   (
     (
@@ -50,7 +58,8 @@ const Gameboard =
     })();
 
 // controls DOM manipulation
-const displayController = (() => {
+// updates DOM and then updates the game state 
+const DisplayController = (() => {
   const boardElement = document.getElementById('gameboard');
 
   const _determineMarkerColor = (marker) => {
@@ -76,7 +85,9 @@ const displayController = (() => {
 
   const updateCellElement = (e) => {
     const index = e.target.id
-    if (Gameboard.cells[index] !== '') { return; }
+    if (Gameboard.cells[index] !== '' || currentGame.isOver()) {
+      return;
+    }
 
     const marker = currentGame.currentPlayerMarker()
     const cellElement = document.getElementById(`${index}`)
@@ -85,19 +96,22 @@ const displayController = (() => {
     currentGame.update(index);
   };
 
-  return { renderBoard }
+  const showGameResult = (result) => {
+    if (!currentGame.isOver()) { return; }
+    const resultElement = document.querySelector('.result');
+    resultElement.textContent = result;
+    resultElement.classList.remove('hidden');
+  };
+
+  return { renderBoard, showGameResult }
 })();
-
-
-// factories: [player, game]
 
 // tells Gameboard where to mark
 // has marker (string) attribute
-const player = (marker) => {
-
+const player = (marker, name) => {
   const markBoard = (index) => Gameboard.update(marker, index);
-
-  return { markBoard, marker }
+  
+  return { markBoard, marker, name }
 };
 
 // contains logic of tic tac toe
@@ -105,26 +119,18 @@ const player = (marker) => {
 // allows players to mark board
 // determines if there is a winner or game is tied
 const game = (
-  player1 = player('x'),
-  player2 = player('o'),
+  player1 = player('x', 'player1'),
+  player2 = player('o', 'player2'),
 ) => {
 
   let currentPlayer = player1;
+  let result = 'draw';
 
   const update = (index) => {
     currentPlayer.markBoard(index);
+    if (winnerExists()) { result = `${currentPlayer.name} wins!`; }
+    if (isOver()) { DisplayController.showGameResult(result); }
     setCurrentPlayer();
-    if (winnerExists()) {
-      console.log('winner')
-    }
-
-    if (isOver()) { 
-      console.log('game over')
-    }
-
-    if (isTied()) {
-      console.log('game is a draw')
-    }
   };
 
   const setCurrentPlayer = () => {
@@ -148,9 +154,9 @@ const game = (
     return (winnerExists() || isTied()) 
   };
 
-  return { update, currentPlayerMarker, setCurrentPlayer, currentPlayer }
+  return { update, currentPlayerMarker, setCurrentPlayer, isOver, currentPlayer }
 
 };
 
 let currentGame = game()
-displayController.renderBoard(Gameboard);
+DisplayController.renderBoard(Gameboard);
