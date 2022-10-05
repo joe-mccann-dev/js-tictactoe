@@ -28,20 +28,11 @@ const Gameboard =
         [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]
       ]
 
-      const lineOfX = () => {
+      const lineOfThree = (marker) => {
         return (
           winLines.some(line => {
             return [cells[line[0]], cells[line[1]], cells[line[2]]]
-              .every(c => c === 'x');
-          })
-        );
-      };
-
-      const lineOfO = () => {
-        return (
-          winLines.some(line => {
-            return [cells[line[0]], cells[line[1]], cells[line[2]]]
-              .every(c => c === 'o');
+              .every(c => c === marker);
           })
         );
       };
@@ -58,7 +49,7 @@ const Gameboard =
         }
       };
 
-      return { cells, update, lineOfX, lineOfO, isFull, reset };
+      return { cells, update, lineOfThree, isFull, reset };
     })();
 
 // controls DOM manipulation
@@ -145,11 +136,12 @@ const game = (
     return (player1Wins() || player2Wins());
   }
 
-  const player1Wins = () => Gameboard.lineOfX();
-  const player2Wins = () => Gameboard.lineOfO();
+  const player1Wins = () => Gameboard.lineOfThree(player1.marker);
+  const player2Wins = () => Gameboard.lineOfThree(player2.marker);
 
   const isTied = () => {
-    return Gameboard.isFull() && (!Gameboard.lineOfX() && !Gameboard.lineOfO());
+    return Gameboard.isFull() &&
+      (!Gameboard.lineOfThree(player1.marker) && !Gameboard.lineOfThree(player2.marker));
   };
 
   const isOver = () => winnerExists() || isTied();
