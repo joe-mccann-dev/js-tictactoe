@@ -62,6 +62,7 @@ h1 {
 }
 
 .button_reset {
+  font-size: 1.2rem;
   font-weight: 700;
   cursor: pointer;
   background: linear-gradient(to right, var(--indigo-600), var(--yellow-600));
@@ -71,7 +72,7 @@ h1 {
 
 .button_reset:hover {
   transform: scale(1.1);
-  transition: .2s;
+  transition: .1s;
 }
 
 .hidden {
