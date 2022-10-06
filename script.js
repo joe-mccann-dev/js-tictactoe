@@ -8,12 +8,6 @@
 // currentGame.update calls currentPlayer.markBoard;
 // Gameboard object is updated.
 
-// contains the current board state, option to pass in updated board
-// for testing purposes:
-// const testBoard = ['', '', 'x', '', '', 'x', '', '', 'x'];
-// const xWins = ['x', 'o', 'x', 'o', 'x', 'o', 'x', 'o', 'x'];
-// const oWins = ['x', 'o', 'x', 'o', 'o', 'x', 'x', 'o', ''];
-// const tied = ['o', 'o', 'x', 'x', 'x', 'o', 'o', 'x', 'x']
 const Gameboard =
   (
     (
@@ -154,9 +148,19 @@ const player = (marker, name) => {
 };
 
 const computerPlayer = (marker = 'o') => {
-  const prototype = player(marker, 'AI')
+  const cpu = player(marker, 'AI')
 
-  const findAvailableIndexes = () => {
+  const markBoard = () => {
+    if (currentGame.state.isOver()) { return; }
+
+    const legalIndexes = _findAvailableIndexes();
+    const randomIndex = _getRandomInt(legalIndexes.length);
+    const indexToMark = legalIndexes[randomIndex]
+    Gameboard.update(marker, indexToMark);
+    DisplayController.updateDOM(indexToMark);
+  }
+
+  const _findAvailableIndexes = () => {
     const openIndexes = [];
     const cells = Gameboard.cells;
     for (let index = 0; index < cells.length; index++) {
@@ -165,19 +169,9 @@ const computerPlayer = (marker = 'o') => {
     return openIndexes;
   };
 
-  const markBoard = () => {
-    if (currentGame.state.isOver()) { return; }
-
-    const legalIndexes = findAvailableIndexes();
-    const randomIndex = _getRandomInt(legalIndexes.length);
-    const indexToMark = legalIndexes[randomIndex]
-    Gameboard.update(marker, indexToMark);
-    DisplayController.updateDOM(indexToMark);
-  }
-
   const _getRandomInt = (max) => Math.floor(Math.random() * max);
 
-  return Object.assign({}, prototype, { markBoard })
+  return Object.assign({}, cpu, { markBoard })
 };
 
 // contains logic of tic tac toe
@@ -259,22 +253,9 @@ const game = (player1, player2, AI = false) => {
   };
 };
 
-const startNewGame = () => {
-  const state = currentGame.state
-  currentGame = game(state.players[0], state.players[1], state.AIGame);
-  Gameboard.reset();
-  DisplayController.resetButton.classList.add('hidden');
-  DisplayController.resultElement.classList.add('hidden');
-  DisplayController.boardElement.replaceChildren();
-  DisplayController.renderBoard();
-};
-
-DisplayController.resetButton.addEventListener('click', startNewGame);
-
 const togglePlayer2 = (e) => {
   DisplayController.player2Input.disabled = e.target.checked ? true : false;
 };
-
 DisplayController.playComputerCheckbox.addEventListener('click', togglePlayer2);
 
 let currentGame;
@@ -290,3 +271,14 @@ DisplayController.form.addEventListener('submit', () => {
   }
   DisplayController.renderBoard();
 });
+
+const startNewGame = () => {
+  const state = currentGame.state
+  currentGame = game(state.players[0], state.players[1], state.AIGame);
+  Gameboard.reset();
+  DisplayController.resetButton.classList.add('hidden');
+  DisplayController.resultElement.classList.add('hidden');
+  DisplayController.boardElement.replaceChildren();
+  DisplayController.renderBoard();
+};
+DisplayController.resetButton.addEventListener('click', startNewGame);
