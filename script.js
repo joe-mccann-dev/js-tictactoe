@@ -209,21 +209,29 @@ const game = (player1, player2, AI = false) => {
 
   const update = (index) => {
     if (AI) {
-      player1.markBoard(index);
-      _toggleCurrentPlayer(player1);
-      player2.markBoard();
-      _toggleCurrentPlayer(player2);
-      if (state.isOver()) {
-        _doFinalTasks(state)
-      }
+      _playComputer(index);
     } else {
-      const player = state.currentPlayer;
-      player.markBoard(index);
-      if (state.isOver()) {
-        _doFinalTasks(state);
-      }
-      _toggleCurrentPlayer(player);
+      _playHuman(index);
     }
+  };
+
+  const _playComputer = (index) => {
+    player1.markBoard(index);
+    _toggleCurrentPlayer(player1);
+    player2.markBoard();
+    _toggleCurrentPlayer(player2);
+    if (state.isOver()) {
+      _doFinalTasks(state)
+    }
+  };
+
+  const _playHuman = (index) => {
+    const player = state.currentPlayer;
+    player.markBoard(index);
+    if (state.isOver()) {
+      _doFinalTasks(state);
+    }
+    _toggleCurrentPlayer(player);
   };
 
   const _doFinalTasks = (state) => {
