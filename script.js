@@ -41,6 +41,7 @@ const Gameboard =
 
       const update = (marker, index) => {
         if (cells[index] === '') { cells[index] = marker; }
+        return cells;
       };
 
       const reset = () => {
@@ -92,12 +93,18 @@ const DisplayController = (() => {
     const index = e.target.id;
     if (Gameboard.cells[index] !== '' || currentGame.state.isOver()) { return; }
 
-    const marker = currentGame.currentPlayerMarker();
-    const cellElement = document.getElementById(`${index}`)
-    cellElement.textContent = marker;
-    _setColor(cellElement, marker);
+    updateDOM(index);
     currentGame.update(index);
     showScores(currentGame.state);
+  };
+
+  const updateDOM = (index) => {
+    // if (Gameboard.cells[index] !== '' || currentGame.state.isOver()) { return; }
+
+    const marker = currentGame.currentPlayerMarker();
+    const cellElement = document.getElementById(index)
+    cellElement.textContent = marker;
+    _setColor(cellElement, marker);
   };
 
   const showScores = (gameState) => {
@@ -119,7 +126,9 @@ const DisplayController = (() => {
 
   return {
     renderBoard,
+    updateCellElement,
     showGameResult,
+    updateDOM,
     boardElement,
     resultElement,
     formContainer,
@@ -144,6 +153,33 @@ const player = (marker, name) => {
   return { markBoard, marker, name, score };
 };
 
+const computerPlayer = (marker = 'o') => {
+  const prototype = player(marker, 'AI')
+
+  const findAvailableIndexes = () => {
+    const openIndexes = [];
+    const cells = Gameboard.cells;
+    for (let index = 0; index < cells.length; index++) {
+      if (cells[index] === '') { openIndexes.push(index); }
+    }
+    return openIndexes;
+  };
+
+  const markBoard = () => {
+    if (currentGame.state.isOver()) { return; }
+
+    const legalIndexes = findAvailableIndexes();
+    const randomIndex = _getRandomInt(legalIndexes.length);
+    const indexToMark = legalIndexes[randomIndex]
+    Gameboard.update(marker, indexToMark);
+    DisplayController.updateDOM(indexToMark);
+  }
+
+  const _getRandomInt = (max) => Math.floor(Math.random() * max);
+
+  return Object.assign({}, prototype, { markBoard })
+};
+
 // contains logic of tic tac toe
 // controls turns
 // allows players to mark board
@@ -163,23 +199,44 @@ const game = (player1, player2) => {
     },
     isTied: () => {
       return Gameboard.isFull() &&
-        (!Gameboard.lineOfThree(player1.marker) && !Gameboard.lineOfThree(player2.marker));
+        (
+          !Gameboard.lineOfThree(player1.marker) &&
+          !Gameboard.lineOfThree(player2.marker)
+        );
     },
   }
 
   const update = (index) => {
-    const player = state.currentPlayer;
-    player.markBoard(index);
-    if (state.winnerExists()) {
-      state.result = `${player.name} wins!`;
-      player.score.incrementWins();
+    player1.markBoard(index);
+    _toggleCurrentPlayer(player1);
+    player2.markBoard();
+    _toggleCurrentPlayer(player2);
+    if (state.isOver()) {
+      _doFinalTasks(state)
     }
-    if (state.isOver()) { DisplayController.showGameResult(state.result) }
-    _setCurrentPlayer(player);
   };
 
-  const _setCurrentPlayer = (current) => {
-    state.currentPlayer = current === player1 ? player2 : player1;
+  const _doFinalTasks = (state) => {
+    if (state.winnerExists()) {
+      _declareWinner(state);
+    }
+    _showGameResult(state);
+  };
+
+  const _declareWinner = (state) => {
+    const player = state.currentPlayer;
+    state.result = `${player.name} wins!`;
+    player.score.incrementWins();
+  };
+
+  const _showGameResult = (state) => {
+    DisplayController.showGameResult(state.result)
+  }
+
+  const _toggleCurrentPlayer = (current) => {
+    if (state.isOver()) { return; }
+
+    return state.currentPlayer = current === player1 ? player2 : player1;
   };
 
   const currentPlayerMarker = () => state.currentPlayer.marker;
@@ -206,7 +263,8 @@ DisplayController.form.addEventListener('submit', () => {
   DisplayController.formContainer.classList.add('hidden');
   const player1Name = DisplayController.player1Input.value || 'Player1';
   const player2Name = DisplayController.player2Input.value || 'Player2';
-  currentGame = game(player('x', player1Name), player('o', player2Name));
+  // currentGame = game(player('x', player1Name), player('o', player2Name));
+  currentGame = game(player('x', player1Name), computerPlayer());
   DisplayController.renderBoard();
 });
 
