@@ -30,6 +30,22 @@ h1 {
   padding: 12px;
 }
 
+.scores {
+  display: flex;
+  flex-direction: column;
+}
+
+.score_container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 1.2rem;
+}
+
+.score {
+  margin: 0;
+}
+
 #gameboard {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

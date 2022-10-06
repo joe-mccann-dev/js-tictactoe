@@ -17,11 +17,11 @@
         <legend>Enter player names (optional)</legend>
         <div class="field">
           <label for="player1_name">Player1</label>
-          <input type="text" id="player1_name">
+          <input type="text" id="player1_name" minlength="1" maxlength="20">
         </div>
         <div class="field">
           <label for="player2_name">Player2</label>
-          <input type="text" id="player2_name">
+          <input type="text" id="player2_name" minlength="1" maxlength="20">
         </div>
         <div class="field">
           <input type="submit" class="button button_start" value="Start Game"></input>
@@ -29,7 +29,18 @@
       </fieldset>
     </form>
   </div>
-  <div id="gameboard" class="hidden"></div>
+  <div class="game_container">
+    <div class="score_container">
+      <p id="player1_name_display"></p>
+      <p id="player1_score" class="score"></p>
+    </div>
+    <div id="gameboard" class="hidden"> 
+    </div>
+    <div class="score_container">
+      <p id="player2_name_display"></p>
+      <p id="player2_score" class="score"></p>
+    </div>
+  </div>
   <p class="result hidden"></p>
   <button type="button" class="button button_reset hidden">PLAY AGAIN</button>
   <script src="script.js"></script>

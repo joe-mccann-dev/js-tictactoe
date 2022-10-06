@@ -62,6 +62,10 @@ const DisplayController = (() => {
   const form = document.querySelector('#form');
   const player1Input = document.querySelector('#player1_name');
   const player2Input = document.querySelector('#player2_name');
+  const player1NameDisplay = document.querySelector('#player1_name_display');
+  const player2NameDisplay = document.querySelector('#player2_name_display');
+  const player1Score = document.querySelector('#player1_score');
+  const player2Score = document.querySelector('#player2_score');
 
   const _determineMarkerColor = (marker) => {
     return marker === 'x' ? 'indigo' : 'yellow';
@@ -86,13 +90,25 @@ const DisplayController = (() => {
 
   const updateCellElement = (e) => {
     const index = e.target.id;
-    if (Gameboard.cells[index] !== '' || currentGame.isOver()) { return; }
+    if (Gameboard.cells[index] !== '' || currentGame.state.isOver()) { return; }
 
-    const marker = currentGame.currentPlayerMarker()
+    const marker = currentGame.currentPlayerMarker();
     const cellElement = document.getElementById(`${index}`)
     cellElement.textContent = marker;
     _setColor(cellElement, marker);
     currentGame.update(index);
+    showScores(currentGame.state);
+  };
+
+  const showScores = (gameState) => {
+    if (!gameState.players.some(p => p.score.wins > 0)) { return; }
+
+    const player1 = gameState.players[0];
+    const player2 = gameState.players[1];
+    player1NameDisplay.textContent = `${player1.name}`;
+    player2NameDisplay.textContent = `${player2.name}`;
+    player1Score.textContent = `${player1.score.wins}`;
+    player2Score.textContent = `${player2.score.wins}`;
   };
 
   const showGameResult = (result) => {
@@ -101,17 +117,19 @@ const DisplayController = (() => {
     resetButton.classList.remove('hidden');
   };
 
-  return { 
-           renderBoard,
-           showGameResult,
-           boardElement, 
-           resultElement,
-           formContainer,
-           form,
-           player1Input,
-           player2Input,
-           resetButton, 
-          };
+  return {
+    renderBoard,
+    showGameResult,
+    boardElement,
+    resultElement,
+    formContainer,
+    form,
+    player1Input,
+    player2Input,
+    player1Score,
+    player2Score,
+    resetButton,
+  };
 })();
 
 // tells Gameboard where to mark
@@ -121,7 +139,7 @@ const player = (marker, name) => {
   const score = {
     wins: 0,
     incrementWins: () => {
-      score.wins += 1;
+      return score.wins += 1;
     }
   }
 
@@ -132,59 +150,52 @@ const player = (marker, name) => {
 // controls turns
 // allows players to mark board
 // determines if there is a winner or game is tied
-const game = (
-  player1 = player('x', 'player1'),
-  player2 = player('o', 'player2'),
-) => {
+const game = (player1, player2) => {
 
-  
-  let currentPlayer = player1;
-  let result = 'draw';
-
-  const update = (index) => {
-    currentPlayer.markBoard(index);
-    if (winnerExists()) { 
-      result = `${currentPlayer.name} wins!`;
-      currentPlayer.score.incrementWins();
-      console.log("current player wins: ", currentPlayer.score.wins)
-    }
-    if (isOver()) { DisplayController.showGameResult(result) }
-    setCurrentPlayer();
-  };
-
-  const setCurrentPlayer = () => {
-    currentPlayer = currentPlayer === player1 ? player2 : player1;
-  };
-
-  const currentPlayerMarker = () => currentPlayer.marker;
-
-  const winnerExists = () => {
-    return (player1Wins() || player2Wins());
+  const state = {
+    players: [player1, player2],
+    currentPlayer: player1,
+    result: 'draw',
+    isOver: () => state.winnerExists() || state.isTied(),
+    winnerExists: () => {
+      return (
+        Gameboard.lineOfThree(player1.marker) ||
+        Gameboard.lineOfThree(player2.marker)
+      )
+    },
+    isTied: () => {
+      return Gameboard.isFull() &&
+        (!Gameboard.lineOfThree(player1.marker) && !Gameboard.lineOfThree(player2.marker));
+    },
   }
 
-  const player1Wins = () => Gameboard.lineOfThree(player1.marker);
-  const player2Wins = () => Gameboard.lineOfThree(player2.marker);
-
-  const isTied = () => {
-    return Gameboard.isFull() &&
-      (!Gameboard.lineOfThree(player1.marker) && !Gameboard.lineOfThree(player2.marker));
+  const update = (index) => {
+    const player = state.currentPlayer;
+    player.markBoard(index);
+    if (state.winnerExists()) {
+      state.result = `${player.name} wins!`;
+      player.score.incrementWins();
+    }
+    if (state.isOver()) { DisplayController.showGameResult(state.result) }
+    _setCurrentPlayer(player);
   };
 
-  const isOver = () => winnerExists() || isTied();
+  const _setCurrentPlayer = (current) => {
+    state.currentPlayer = current === player1 ? player2 : player1;
+  };
 
-  return { 
+  const currentPlayerMarker = () => state.currentPlayer.marker;
+
+  return {
     update,
     currentPlayerMarker,
-    setCurrentPlayer,
-    isOver,
-    currentPlayer,
-    player1,
-    player2
+    state,
   };
 };
 
 const startNewGame = () => {
-  currentGame = game(currentGame.player1, currentGame.player2);
+  const state = currentGame.state
+  currentGame = game(state.players[0], state.players[1]);
   Gameboard.reset();
   DisplayController.resetButton.classList.add('hidden');
   DisplayController.resultElement.classList.add('hidden');
