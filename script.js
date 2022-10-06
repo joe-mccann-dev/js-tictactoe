@@ -241,7 +241,6 @@ const game = (player1, player2, AI = false) => {
   const _doFinalTasks = (state) => {
     if (state.winnerExists()) {
       _declareWinner(state);
-      console.log(Gameboard.winningLine)
       DisplayController.highlightWinningLine();
     }
     _showGameResult(state);
