@@ -105,10 +105,10 @@ const DisplayController = (() => {
 
     const player1 = gameState.players[0];
     const player2 = gameState.players[1];
-    player1NameDisplay.textContent = `${player1.name}`;
-    player2NameDisplay.textContent = `${player2.name}`;
-    player1Score.textContent = `${player1.score.wins}`;
-    player2Score.textContent = `${player2.score.wins}`;
+    player1NameDisplay.textContent = player1.name;
+    player2NameDisplay.textContent = player2.name;
+    player1Score.textContent = player1.score.wins;
+    player2Score.textContent = player2.score.wins;
   };
 
   const showGameResult = (result) => {
