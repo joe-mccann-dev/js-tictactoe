@@ -148,7 +148,7 @@ const player = (marker, name) => {
 };
 
 const computerPlayer = (marker = 'o') => {
-  const cpu = player(marker, 'AI')
+  const cpu = player(marker, 'computer')
 
   const markBoard = () => {
     if (currentGame.state.isOver()) { return; }
