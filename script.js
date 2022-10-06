@@ -126,8 +126,6 @@ const DisplayController = (() => {
     form,
     player1Input,
     player2Input,
-    player1Score,
-    player2Score,
     resetButton,
   };
 })();
