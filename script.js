@@ -213,6 +213,7 @@ const game = (player1, player2, AI = false) => {
     } else {
       _playHuman(index);
     }
+    if (state.isOver()) { _doFinalTasks(state) }
   };
 
   const _playComputer = (index) => {
@@ -220,24 +221,16 @@ const game = (player1, player2, AI = false) => {
     _toggleCurrentPlayer(player1);
     player2.markBoard();
     _toggleCurrentPlayer(player2);
-    if (state.isOver()) {
-      _doFinalTasks(state)
-    }
   };
 
   const _playHuman = (index) => {
     const player = state.currentPlayer;
     player.markBoard(index);
-    if (state.isOver()) {
-      _doFinalTasks(state);
-    }
     _toggleCurrentPlayer(player);
   };
 
   const _doFinalTasks = (state) => {
-    if (state.winnerExists()) {
-      _declareWinner(state);
-    }
+    if (state.winnerExists()) { _declareWinner(state); }
     _showGameResult(state);
   };
 
