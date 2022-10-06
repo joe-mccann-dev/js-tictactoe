@@ -184,12 +184,13 @@ const computerPlayer = (marker = 'o') => {
 // controls turns
 // allows players to mark board
 // determines if there is a winner or game is tied
-const game = (player1, player2) => {
+const game = (player1, player2, AI = false) => {
 
   const state = {
     players: [player1, player2],
     currentPlayer: player1,
     result: 'draw',
+    AIGame: AI,
     isOver: () => state.winnerExists() || state.isTied(),
     winnerExists: () => {
       return (
@@ -207,12 +208,21 @@ const game = (player1, player2) => {
   }
 
   const update = (index) => {
-    player1.markBoard(index);
-    _toggleCurrentPlayer(player1);
-    player2.markBoard();
-    _toggleCurrentPlayer(player2);
-    if (state.isOver()) {
-      _doFinalTasks(state)
+    if (AI) {
+      player1.markBoard(index);
+      _toggleCurrentPlayer(player1);
+      player2.markBoard();
+      _toggleCurrentPlayer(player2);
+      if (state.isOver()) {
+        _doFinalTasks(state)
+      }
+    } else {
+      const player = state.currentPlayer;
+      player.markBoard(index);
+      if (state.isOver()) {
+        _doFinalTasks(state);
+      }
+      _toggleCurrentPlayer(player);
     }
   };
 
@@ -250,7 +260,7 @@ const game = (player1, player2) => {
 
 const startNewGame = () => {
   const state = currentGame.state
-  currentGame = game(state.players[0], state.players[1]);
+  currentGame = game(state.players[0], state.players[1], state.AIGame);
   Gameboard.reset();
   DisplayController.resetButton.classList.add('hidden');
   DisplayController.resultElement.classList.add('hidden');
@@ -264,7 +274,7 @@ DisplayController.form.addEventListener('submit', () => {
   const player1Name = DisplayController.player1Input.value || 'Player1';
   const player2Name = DisplayController.player2Input.value || 'Player2';
   // currentGame = game(player('x', player1Name), player('o', player2Name));
-  currentGame = game(player('x', player1Name), computerPlayer());
+  currentGame = game(player('x', player1Name), computerPlayer(), true);
   DisplayController.renderBoard();
 });
 
