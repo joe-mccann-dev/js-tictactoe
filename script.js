@@ -99,8 +99,6 @@ const DisplayController = (() => {
   };
 
   const updateDOM = (index) => {
-    // if (Gameboard.cells[index] !== '' || currentGame.state.isOver()) { return; }
-
     const marker = currentGame.currentPlayerMarker();
     const cellElement = document.getElementById(index)
     cellElement.textContent = marker;
