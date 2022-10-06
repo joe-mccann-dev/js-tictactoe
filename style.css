@@ -89,6 +89,10 @@ fieldset {
   gap: 4px;
 }
 
+.play_computer {
+  flex-direction: row;
+}
+
 input[type="text"] {
   height: 24px;
   font-weight: 700;

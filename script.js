@@ -67,6 +67,7 @@ const DisplayController = (() => {
   const player2NameDisplay = document.querySelector('#player2_name_display');
   const player1Score = document.querySelector('#player1_score');
   const player2Score = document.querySelector('#player2_score');
+  const playComputerCheckbox = document.querySelector('#play_computer');
 
   const _determineMarkerColor = (marker) => {
     return marker === 'x' ? 'indigo' : 'yellow';
@@ -134,6 +135,7 @@ const DisplayController = (() => {
     player1Input,
     player2Input,
     resetButton,
+    playComputerCheckbox
   };
 })();
 
@@ -267,6 +269,14 @@ const startNewGame = () => {
   DisplayController.renderBoard();
 };
 
+DisplayController.resetButton.addEventListener('click', startNewGame);
+
+const togglePlayer2 = (e) => {
+  DisplayController.player2Input.disabled = e.target.checked ? true : false;
+};
+
+DisplayController.playComputerCheckbox.addEventListener('click', togglePlayer2);
+
 let currentGame;
 DisplayController.form.addEventListener('submit', () => {
   DisplayController.formContainer.classList.add('hidden');
@@ -276,5 +286,3 @@ DisplayController.form.addEventListener('submit', () => {
   currentGame = game(player('x', player1Name), computerPlayer(), true);
   DisplayController.renderBoard();
 });
-
-DisplayController.resetButton.addEventListener('click', startNewGame);
