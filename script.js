@@ -22,11 +22,18 @@ const Gameboard =
         [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]
       ]
 
+      const winningLine = { 'current': [] }
+
       const lineOfThree = (marker) => {
         return (
           winLines.some(line => {
-            return [cells[line[0]], cells[line[1]], cells[line[2]]]
-              .every(c => c === marker);
+            if (
+              [cells[line[0]], cells[line[1]], cells[line[2]]]
+                .every(c => c === marker)
+            ) {
+              winningLine['current'] = line;
+              return true;
+            }
           })
         );
       };
@@ -44,7 +51,7 @@ const Gameboard =
         }
       };
 
-      return { cells, update, lineOfThree, isFull, reset };
+      return { cells, update, lineOfThree, isFull, reset, winningLine };
     })();
 
 // controls DOM manipulation
@@ -70,6 +77,13 @@ const DisplayController = (() => {
   const _setColor = (cellElement, marker) => {
     const color = _determineMarkerColor(marker);
     cellElement.classList.add(color);
+  };
+
+  const highlightWinningLine = () => {
+    Gameboard.winningLine['current'].forEach((index) => {
+      const cellElement = document.getElementById(index);
+      cellElement.classList.add('highlighted');
+    })
   };
 
   const renderBoard = () => {
@@ -122,6 +136,7 @@ const DisplayController = (() => {
     updateCellElement,
     showGameResult,
     updateDOM,
+    highlightWinningLine,
     boardElement,
     resultElement,
     formContainer,
@@ -224,7 +239,11 @@ const game = (player1, player2, AI = false) => {
   };
 
   const _doFinalTasks = (state) => {
-    if (state.winnerExists()) { _declareWinner(state); }
+    if (state.winnerExists()) {
+      _declareWinner(state);
+      console.log(Gameboard.winningLine)
+      DisplayController.highlightWinningLine();
+    }
     _showGameResult(state);
   };
 

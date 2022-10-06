@@ -6,7 +6,9 @@
   --neutral-200: #e5e5e5;
   --neutral-500: #737373;
   --neutral-800: #262626;
+  --indigo-200: #c7d2fe;
   --indigo-600: #4f46e5;
+  --yellow-200: #fef08a;
   --yellow-600: #ca8a04;
 }
 
@@ -70,6 +72,10 @@ h1 {
 
 .indigo {
   color: var(--indigo-600);
+}
+
+.highlighted {
+  background: linear-gradient(to right, var(--indigo-200), var(--yellow-200));
 }
 
 .result {
