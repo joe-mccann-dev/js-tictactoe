@@ -282,7 +282,11 @@ DisplayController.form.addEventListener('submit', () => {
   DisplayController.formContainer.classList.add('hidden');
   const player1Name = DisplayController.player1Input.value || 'Player1';
   const player2Name = DisplayController.player2Input.value || 'Player2';
-  // currentGame = game(player('x', player1Name), player('o', player2Name));
-  currentGame = game(player('x', player1Name), computerPlayer(), true);
+  const wantsToPlayComputer = DisplayController.playComputerCheckbox.checked;
+  if (wantsToPlayComputer) {
+    currentGame = game(player('x', player1Name), computerPlayer(), true);
+  } else {
+    currentGame = game(player('x', player1Name), player('o', player2Name));
+  }
   DisplayController.renderBoard();
 });
