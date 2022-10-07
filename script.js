@@ -154,8 +154,8 @@ const player = (marker, name) => {
 
   const score = {
     wins: 0,
-    incrementWins: () => {
-      return score.wins += 1;
+    incrementWins: function() {
+      return this.wins += 1;
     }
   }
 
@@ -200,7 +200,7 @@ const game = (player1, player2, AI = false) => {
     currentPlayer: player1,
     result: 'draw',
     AIGame: AI,
-    isOver: () => state.winnerExists() || state.isTied(),
+    isOver: function() { return this.winnerExists() || this.isTied() },
     winnerExists: () => {
       return (
         Gameboard.lineOfThree(player1.marker) ||
