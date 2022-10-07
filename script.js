@@ -22,7 +22,7 @@ const Gameboard =
         [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]
       ]
 
-      const winningLine = { 'current': [] }
+      const winningLine = { 'current': [] };
 
       const lineOfThree = (marker) => {
         return (
@@ -51,7 +51,7 @@ const Gameboard =
         }
       };
 
-      return { cells, update, lineOfThree, isFull, reset, winningLine };
+      return { cells, winningLine, update, lineOfThree, isFull, reset };
     })();
 
 // controls DOM manipulation
@@ -69,15 +69,6 @@ const DisplayController = (() => {
   const player1Score = document.querySelector('#player1_score');
   const player2Score = document.querySelector('#player2_score');
   const playComputerCheckbox = document.querySelector('#play_computer');
-
-  const _determineMarkerColor = (marker) => {
-    return marker === 'x' ? 'indigo' : 'yellow';
-  }
-
-  const _setColor = (cellElement, marker) => {
-    const color = _determineMarkerColor(marker);
-    cellElement.classList.add(color);
-  };
 
   const highlightWinningLine = () => {
     Gameboard.winningLine['current'].forEach((index) => {
@@ -109,7 +100,7 @@ const DisplayController = (() => {
 
   const updateDOM = (index) => {
     const marker = currentGame.currentPlayerMarker();
-    const cellElement = document.getElementById(index)
+    const cellElement = document.getElementById(index);
     cellElement.textContent = marker;
     _setColor(cellElement, marker);
   };
@@ -129,6 +120,15 @@ const DisplayController = (() => {
     resultElement.textContent = result;
     resultElement.classList.remove('hidden');
     resetButton.classList.remove('hidden');
+  };
+
+  const _determineMarkerColor = (marker) => {
+    return marker === 'x' ? 'indigo' : 'yellow';
+  }
+
+  const _setColor = (cellElement, marker) => {
+    const color = _determineMarkerColor(marker);
+    cellElement.classList.add(color);
   };
 
   return {
@@ -154,9 +154,7 @@ const player = (marker, name) => {
 
   const score = {
     wins: 0,
-    incrementWins: function() {
-      return this.wins += 1;
-    }
+    incrementWins: function() { return this.wins += 1; }
   }
 
   return { markBoard, marker, name, score };
@@ -164,6 +162,16 @@ const player = (marker, name) => {
 
 const computerPlayer = (marker = 'o') => {
   const cpu = player(marker, 'computer')
+
+  const markBoard = () => {
+    if (currentGame.state.isOver()) { return; }
+
+    const legalIndexes = _findAvailableIndexes();
+    const randomIndex = _getRandomInt(legalIndexes.length);
+    const indexToMark = legalIndexes[randomIndex]
+    Gameboard.update(marker, indexToMark);
+    DisplayController.updateDOM(indexToMark);
+  }
 
   const _findAvailableIndexes = () => {
     const openIndexes = [];
@@ -176,17 +184,7 @@ const computerPlayer = (marker = 'o') => {
 
   const _getRandomInt = (max) => Math.floor(Math.random() * max);
 
-  const markBoard = () => {
-    if (currentGame.state.isOver()) { return; }
-
-    const legalIndexes = _findAvailableIndexes();
-    const randomIndex = _getRandomInt(legalIndexes.length);
-    const indexToMark = legalIndexes[randomIndex]
-    Gameboard.update(marker, indexToMark);
-    DisplayController.updateDOM(indexToMark);
-  }
-
-  return Object.assign({}, cpu, { markBoard })
+  return Object.assign({}, cpu, { markBoard });
 };
 
 // contains logic of tic tac toe
@@ -222,7 +220,7 @@ const game = (player1, player2, AI = false) => {
     } else {
       _playHuman(index);
     }
-    if (state.isOver()) { _doFinalTasks(state) }
+    if (state.isOver()) { _performEndGameTasks(state) }
   };
 
   const _playComputer = (index) => {
@@ -238,11 +236,8 @@ const game = (player1, player2, AI = false) => {
     _toggleCurrentPlayer(player);
   };
 
-  const _doFinalTasks = (state) => {
-    if (state.winnerExists()) {
-      _declareWinner(state);
-      DisplayController.highlightWinningLine();
-    }
+  const _performEndGameTasks = (state) => {
+    if (state.winnerExists()) { _declareWinner(state); }
     DisplayController.showGameResult(state.result)
   };
 
@@ -250,6 +245,7 @@ const game = (player1, player2, AI = false) => {
     const player = state.currentPlayer;
     state.result = `${player.name} wins!`;
     player.score.incrementWins();
+    DisplayController.highlightWinningLine();
   };
 
   const _toggleCurrentPlayer = (current) => {
