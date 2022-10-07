@@ -97,12 +97,18 @@ fieldset {
 
 .play_computer {
   flex-direction: row;
+  align-items: center;
 }
 
 input[type="text"] {
   height: 24px;
   font-weight: 700;
   padding-left: 8px;
+}
+
+input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
 }
 
 
