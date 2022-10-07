@@ -217,11 +217,7 @@ const game = (player1, player2, AI = false) => {
   const currentPlayerMarker = () => state.currentPlayer.marker;
 
   const update = (index) => {
-    if (AI) {
-      _playComputer(index);
-    } else {
-      _playHuman(index);
-    }
+    AI ? _playComputer(index) : _playHuman(index);
     if (state.isOver()) { _performEndGameTasks(state) }
   };
 
