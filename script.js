@@ -212,7 +212,9 @@ const game = (player1, player2, AI = false) => {
           !Gameboard.lineOfThree(player2.marker)
         );
     },
-  }
+  };
+
+  const currentPlayerMarker = () => state.currentPlayer.marker;
 
   const update = (index) => {
     if (AI) {
@@ -253,8 +255,6 @@ const game = (player1, player2, AI = false) => {
 
     return state.currentPlayer = current === player1 ? player2 : player1;
   };
-
-  const currentPlayerMarker = () => state.currentPlayer.marker;
 
   return {
     update,
