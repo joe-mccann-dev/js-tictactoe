@@ -165,16 +165,6 @@ const player = (marker, name) => {
 const computerPlayer = (marker = 'o') => {
   const cpu = player(marker, 'computer')
 
-  const markBoard = () => {
-    if (currentGame.state.isOver()) { return; }
-
-    const legalIndexes = _findAvailableIndexes();
-    const randomIndex = _getRandomInt(legalIndexes.length);
-    const indexToMark = legalIndexes[randomIndex]
-    Gameboard.update(marker, indexToMark);
-    DisplayController.updateDOM(indexToMark);
-  }
-
   const _findAvailableIndexes = () => {
     const openIndexes = [];
     const cells = Gameboard.cells;
@@ -185,6 +175,16 @@ const computerPlayer = (marker = 'o') => {
   };
 
   const _getRandomInt = (max) => Math.floor(Math.random() * max);
+
+  const markBoard = () => {
+    if (currentGame.state.isOver()) { return; }
+
+    const legalIndexes = _findAvailableIndexes();
+    const randomIndex = _getRandomInt(legalIndexes.length);
+    const indexToMark = legalIndexes[randomIndex]
+    Gameboard.update(marker, indexToMark);
+    DisplayController.updateDOM(indexToMark);
+  }
 
   return Object.assign({}, cpu, { markBoard })
 };
