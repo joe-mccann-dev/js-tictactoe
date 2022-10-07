@@ -243,7 +243,7 @@ const game = (player1, player2, AI = false) => {
       _declareWinner(state);
       DisplayController.highlightWinningLine();
     }
-    _showGameResult(state);
+    DisplayController.showGameResult(state.result)
   };
 
   const _declareWinner = (state) => {
@@ -251,10 +251,6 @@ const game = (player1, player2, AI = false) => {
     state.result = `${player.name} wins!`;
     player.score.incrementWins();
   };
-
-  const _showGameResult = (state) => {
-    DisplayController.showGameResult(state.result)
-  }
 
   const _toggleCurrentPlayer = (current) => {
     if (state.isOver()) { return; }
