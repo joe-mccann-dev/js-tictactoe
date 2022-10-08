@@ -176,9 +176,44 @@ const computerPlayer = (marker = 'o') => {
     DisplayController.updateDOM(indexToMark);
   }
 
-  const _findAvailableIndexes = () => {
+  // use negamax variation of recursive minimax algorithm to determine next cpu move
+  // value associated with each position of state of the game
+  // computed with _positionEvaluation (indicates how good that position is)
+  //  in markBoard function, indexToMark is the return value of this function
+  // 
+
+  // const _negamax = (node, depth, color) => {
+  //   if (depth === 0 || node.next === undefined) {
+  //     return color * heuristic  // value of node
+  //   }
+  //     let value = Number.NEGATIVE_INFINITY;
+  //     const current = node;
+  //     while (node.next) {
+  //       value = Math.max(value, -(_negamax(node.next, depth - 1 -color)))
+  //     }
+  //     return value // integer
+  //   }
+
+
+
+  // generate object with currentBoard that points to potential next board states
+  const generateGameTree = () => {
+    const gameTree = {};
+    const currentBoard = Gameboard.cells.map(marker => marker);
+    gameTree[currentBoard] = [];
+    for (let i = 0; i < currentBoard.length; i++) {
+      const copy = currentBoard.map(marker => marker);
+      if (currentBoard[i] === '') {
+        copy[i] = marker;
+        gameTree[currentBoard].push(copy);
+      }
+    };
+    return gameTree;
+  };
+
+  const _findAvailableIndexes = (cells = Gameboard.cells) => {
     const openIndexes = [];
-    const cells = Gameboard.cells;
+    // const cells = Gameboard.cells;
     for (let index = 0; index < cells.length; index++) {
       if (cells[index] === '') { openIndexes.push(index); }
     }
@@ -187,7 +222,7 @@ const computerPlayer = (marker = 'o') => {
 
   const _getRandomInt = (max) => Math.floor(Math.random() * max);
 
-  return Object.assign({}, cpu, { markBoard });
+  return Object.assign({}, cpu, { markBoard, generateGameTree });
 };
 
 // contains logic of tic tac toe
