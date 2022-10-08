@@ -112,6 +112,8 @@ const DisplayController = (() => {
     const player2 = gameState.players[1];
     player1NameDisplay.textContent = player1.name;
     player2NameDisplay.textContent = player2.name;
+    player1Score.classList.remove('hidden');
+    player2Score.classList.remove('hidden');
     player1Score.textContent = player1.score.wins;
     player2Score.textContent = player2.score.wins;
   };
@@ -119,6 +121,7 @@ const DisplayController = (() => {
   const showGameResult = (result) => {
     resultElement.textContent = result;
     resultElement.classList.remove('hidden');
+    resultElement.classList.add('highlighted');
     resetButton.classList.remove('hidden');
   };
 

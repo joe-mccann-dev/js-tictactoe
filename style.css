@@ -46,6 +46,8 @@ h1 {
 
 .score {
   margin: 0;
+  padding: 6px;
+  color: var(--neutral-800);
 }
 
 #gameboard {
@@ -81,6 +83,8 @@ h1 {
 .result {
   font-size: 1.5rem;
   text-transform: uppercase;
+  padding: 16px;
+  color: var(--neutral-800);
 }
 
 fieldset {
