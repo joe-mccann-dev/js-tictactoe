@@ -74,7 +74,7 @@ const DisplayController = (() => {
     Gameboard.winningLine['current'].forEach((index) => {
       const cellElement = document.getElementById(index);
       cellElement.classList.add('highlighted');
-    })
+    });
   };
 
   const renderBoard = () => {
@@ -171,7 +171,7 @@ const computerPlayer = (marker = 'o') => {
 
     const legalIndexes = _findAvailableIndexes();
     const randomIndex = _getRandomInt(legalIndexes.length);
-    const indexToMark = legalIndexes[randomIndex]
+    const indexToMark = legalIndexes[randomIndex];
     Gameboard.update(marker, indexToMark);
     DisplayController.updateDOM(indexToMark);
   }
@@ -221,7 +221,7 @@ const game = (player1, player2, AI = false) => {
 
   const update = (index) => {
     AI ? _playComputer(index) : _playHuman(index);
-    if (state.isOver()) { _performEndGameTasks(state) }
+    if (state.isOver()) { _performEndGameTasks(state); }
   };
 
   const _playComputer = (index) => {
@@ -239,7 +239,7 @@ const game = (player1, player2, AI = false) => {
 
   const _performEndGameTasks = (state) => {
     if (state.winnerExists()) { _declareWinner(state); }
-    DisplayController.showGameResult(state.result)
+    DisplayController.showGameResult(state.result);
   };
 
   const _declareWinner = (state) => {
