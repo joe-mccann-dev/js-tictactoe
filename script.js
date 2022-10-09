@@ -24,11 +24,12 @@ const Gameboard =
 
       const winningLine = { 'current': [] };
 
-      const lineOfThree = (marker) => {
+
+      const lineOfThree = (marker, board = cells) => {
         return (
           winLines.some(line => {
             if (
-              [cells[line[0]], cells[line[1]], cells[line[2]]]
+              [board[line[0]], board[line[1]], board[line[2]]]
                 .every(c => c === marker)
             ) {
               winningLine['current'] = line;
@@ -38,7 +39,7 @@ const Gameboard =
         );
       };
 
-      const isFull = () => cells.every(c => c !== '');
+      const isFull = (board = cells) => board.every(c => c !== '');
 
       const update = (marker, index) => {
         if (cells[index] === '') { cells[index] = marker; }
@@ -157,7 +158,7 @@ const player = (marker, name) => {
 
   const score = {
     wins: 0,
-    incrementWins: function() { return this.wins += 1; }
+    incrementWins: function () { return this.wins += 1; }
   }
 
   return { markBoard, marker, name, score };
@@ -176,44 +177,8 @@ const computerPlayer = (marker = 'o') => {
     DisplayController.updateDOM(indexToMark);
   }
 
-  // use negamax variation of recursive minimax algorithm to determine next cpu move
-  // value associated with each position of state of the game
-  // computed with _positionEvaluation (indicates how good that position is)
-  //  in markBoard function, indexToMark is the return value of this function
-  // 
-
-  // const _negamax = (node, depth, color) => {
-  //   if (depth === 0 || node.next === undefined) {
-  //     return color * heuristic  // value of node
-  //   }
-  //     let value = Number.NEGATIVE_INFINITY;
-  //     const current = node;
-  //     while (node.next) {
-  //       value = Math.max(value, -(_negamax(node.next, depth - 1 -color)))
-  //     }
-  //     return value // integer
-  //   }
-
-
-
-  // generate object with currentBoard that points to potential next board states
-  const generateGameTree = () => {
-    const gameTree = {};
-    const currentBoard = Gameboard.cells.map(marker => marker);
-    gameTree[currentBoard] = [];
-    for (let i = 0; i < currentBoard.length; i++) {
-      const copy = currentBoard.map(marker => marker);
-      if (currentBoard[i] === '') {
-        copy[i] = marker;
-        gameTree[currentBoard].push(copy);
-      }
-    };
-    return gameTree;
-  };
-
   const _findAvailableIndexes = (cells = Gameboard.cells) => {
     const openIndexes = [];
-    // const cells = Gameboard.cells;
     for (let index = 0; index < cells.length; index++) {
       if (cells[index] === '') { openIndexes.push(index); }
     }
@@ -222,7 +187,7 @@ const computerPlayer = (marker = 'o') => {
 
   const _getRandomInt = (max) => Math.floor(Math.random() * max);
 
-  return Object.assign({}, cpu, { markBoard, generateGameTree });
+  return Object.assign({}, cpu, { markBoard });
 };
 
 // contains logic of tic tac toe
@@ -236,18 +201,18 @@ const game = (player1, player2, AI = false) => {
     currentPlayer: player1,
     result: 'draw',
     AIGame: AI,
-    isOver: function() { return this.winnerExists() || this.isTied() },
+    isOver: function () { return this.winnerExists() || this.isTied() },
     winnerExists: () => {
       return (
         Gameboard.lineOfThree(player1.marker) ||
         Gameboard.lineOfThree(player2.marker)
       )
     },
-    isTied: () => {
+    isTied: (board = Gameboard.cells) => {
       return Gameboard.isFull() &&
         (
-          !Gameboard.lineOfThree(player1.marker) &&
-          !Gameboard.lineOfThree(player2.marker)
+          !Gameboard.lineOfThree(player1.marker, board) &&
+          !Gameboard.lineOfThree(player2.marker, board)
         );
     },
   };
@@ -258,6 +223,56 @@ const game = (player1, player2, AI = false) => {
     AI ? _playComputer(index) : _playHuman(index);
     if (state.isOver()) { _performEndGameTasks(state); }
   };
+
+  const generateNextBoardStates = (player, board = Gameboard.cells) => {
+    const result = [];
+    const gameBoardCopy = Gameboard.cells.map(m => m);
+    for (let i = 0; i < gameBoardCopy.length; i++) {
+      const copy = gameBoardCopy.map(m => m);
+      if (gameBoardCopy[i] === '') {
+        copy[i] = player.marker;
+        result.push(copy);
+      }
+    };
+    return result;
+  };
+
+  const evaluatePotentialBoard = (board, player) => {
+    if (Gameboard.lineOfThree(player.marker, board)) {
+      return 1;
+    }
+    if (Gameboard.lineOfThree(player.marker, board)) {
+      return -1;
+    }
+    return 0;
+  };
+
+  const minimax = (board, depth, maximizingPlayer) => {
+    if (depth === 0 || Gameboard.isFull(board)) {
+      if (maximizingPlayer) {
+        return evaluatePotentialBoard(board, player1);
+      } else {
+        return evaluatePotentialBoard(board, player2)
+      }
+    }
+
+    if (maximizingPlayer) {
+      let value = Number.NEGATIVE_INFINITY
+      const children = generateNextBoardStates(board, player1);
+      for (let i = 0; i < children.length; i++) {
+        value = Math.max(value, minimax(children[i], depth - 1, false))
+      }
+      return value;
+    } else {
+        let value = Number.POSITIVE_INFINITY;
+        const children = generateNextBoardStates(board, player2);
+        for (let i = 0; i < children.length; i++) {
+          value = Math.min(value, minimax(children[i], depth - 1, true))
+        }
+        return value;
+    }
+
+  }
 
   const _playComputer = (index) => {
     player1.markBoard(index);
@@ -292,6 +307,9 @@ const game = (player1, player2, AI = false) => {
 
   return {
     update,
+    minimax,
+    generateNextBoardStates,
+    evaluatePotentialBoard,
     currentPlayerMarker,
     state,
   };
