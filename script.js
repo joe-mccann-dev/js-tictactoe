@@ -180,7 +180,9 @@ const computerPlayer = (marker = 'o') => {
   const smartMarkBoard = () => {
     if (currentGame.state.isOver()) { return; }
     const boards = currentGame.generateNextBoardStates(currentGame.state.players[1]);
-    return boards
+    for (let i = 0; i < boards.length; i++) {
+      console.log(currentGame.minimax(boards[i], boards.length, false, currentGame.state.players[1]))
+    }
   };
 
   const _findAvailableIndexes = (cells = Gameboard.cells) => {
