@@ -175,7 +175,13 @@ const computerPlayer = (marker = 'o') => {
     const indexToMark = legalIndexes[randomIndex];
     Gameboard.update(marker, indexToMark);
     DisplayController.updateDOM(indexToMark);
-  }
+  };
+
+  const smartMarkBoard = () => {
+    if (currentGame.state.isOver()) { return; }
+    const boards = currentGame.generateNextBoardStates(currentGame.state.players[1]);
+    return boards
+  };
 
   const _findAvailableIndexes = (cells = Gameboard.cells) => {
     const openIndexes = [];
@@ -187,7 +193,7 @@ const computerPlayer = (marker = 'o') => {
 
   const _getRandomInt = (max) => Math.floor(Math.random() * max);
 
-  return Object.assign({}, cpu, { markBoard });
+  return Object.assign({}, cpu, { markBoard, smartMarkBoard });
 };
 
 // contains logic of tic tac toe
@@ -238,10 +244,13 @@ const game = (player1, player2, AI = false) => {
   };
 
   const evaluatePotentialBoard = (board, player) => {
-    if (Gameboard.lineOfThree(player.marker, board)) {
+    const otherPlayer = player === state.players[1] ?
+      state.players[0] :
+      state.players[1]
+    if (Gameboard.lineOfThree(otherPlayer.marker, board)) {
       return 1;
     }
-    if (Gameboard.lineOfThree(player.marker, board)) {
+    if (Gameboard.lineOfThree(otherPlayer.marker, board)) {
       return -1;
     }
     return 0;
@@ -256,20 +265,25 @@ const game = (player1, player2, AI = false) => {
       }
     }
 
+    const player = state.currentPlayer === state.players[1] ?
+      state.players[0] :
+      state.players[1]
+
     if (maximizingPlayer) {
       let value = Number.NEGATIVE_INFINITY
-      const children = generateNextBoardStates(board, player1);
+      const children = generateNextBoardStates(player, board);
+      // console.log(board)
       for (let i = 0; i < children.length; i++) {
         value = Math.max(value, minimax(children[i], depth - 1, false))
       }
       return value;
     } else {
-        let value = Number.POSITIVE_INFINITY;
-        const children = generateNextBoardStates(board, player2);
-        for (let i = 0; i < children.length; i++) {
-          value = Math.min(value, minimax(children[i], depth - 1, true))
-        }
-        return value;
+      let value = Number.POSITIVE_INFINITY;
+      const children = generateNextBoardStates(player, board);
+      for (let i = 0; i < children.length; i++) {
+        value = Math.min(value, minimax(children[i], depth - 1, true))
+      }
+      return value;
     }
 
   }
