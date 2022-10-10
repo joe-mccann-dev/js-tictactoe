@@ -244,44 +244,34 @@ const game = (player1, player2, AI = false) => {
   };
 
   const evaluatePotentialBoard = (board, player) => {
-    const otherPlayer = player === state.players[1] ?
-      state.players[0] :
-      state.players[1]
-    if (Gameboard.lineOfThree(otherPlayer.marker, board)) {
+    if (Gameboard.lineOfThree(player.marker, board)) {
       return 1;
     }
-    if (Gameboard.lineOfThree(otherPlayer.marker, board)) {
+    if (Gameboard.lineOfThree(player.marker, board)) {
       return -1;
     }
     return 0;
   };
 
-  const minimax = (board, depth, maximizingPlayer) => {
+  const minimax = (board, depth, maximizingPlayer, currentPlayer ) => {
     if (depth === 0 || Gameboard.isFull(board)) {
-      if (maximizingPlayer) {
-        return evaluatePotentialBoard(board, player1);
-      } else {
-        return evaluatePotentialBoard(board, player2)
-      }
+      return evaluatePotentialBoard(board, currentPlayer)
     }
-
-    const player = state.currentPlayer === state.players[1] ?
-      state.players[0] :
-      state.players[1]
 
     if (maximizingPlayer) {
       let value = Number.NEGATIVE_INFINITY
-      const children = generateNextBoardStates(player, board);
-      // console.log(board)
+      const children = generateNextBoardStates(currentPlayer, board);
+      currentPlayer = currentPlayer === player1 ? player2 : player1
       for (let i = 0; i < children.length; i++) {
-        value = Math.max(value, minimax(children[i], depth - 1, false))
+        value = Math.max(value, minimax(children[i], depth - 1, false, currentPlayer))
       }
       return value;
     } else {
       let value = Number.POSITIVE_INFINITY;
-      const children = generateNextBoardStates(player, board);
+      const children = generateNextBoardStates(currentPlayer, board);
+      currentPlayer = currentPlayer === player1 ? player2 : player1
       for (let i = 0; i < children.length; i++) {
-        value = Math.min(value, minimax(children[i], depth - 1, true))
+        value = Math.min(value, minimax(children[i], depth - 1, true, currentPlayer))
       }
       return value;
     }
