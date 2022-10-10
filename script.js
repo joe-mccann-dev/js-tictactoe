@@ -181,7 +181,7 @@ const computerPlayer = (marker = 'o') => {
     if (currentGame.state.isOver()) { return; }
     const boards = currentGame.generateNextBoardStates(currentGame.state.players[1]);
     for (let i = 0; i < boards.length; i++) {
-      console.log(currentGame.minimax(boards[i], boards.length, false, currentGame.state.players[1]))
+      console.log(currentGame.negamax(boards[i], boards.length, -1, currentGame.state.players[1]))
     }
   };
 
@@ -245,58 +245,38 @@ const game = (player1, player2, AI = false) => {
     return result;
   };
 
-  const evaluatePotentialBoard = (board, currentPlayer, maximizingPlayer) => {
+  const evaluatePotentialBoard = (board, currentPlayer) => {
     const otherPlayer = currentPlayer === state.players[0] ?
       state.players[1] :
       state.players[0]
-    if (maximizingPlayer) {
-      if (Gameboard.lineOfThree(currentPlayer.marker, board)) {
-        return 1;
-      } else if (Gameboard.lineOfThree(otherPlayer.marker, board)) {
-        return -1;
-      } else {
-        return 0;
-      }
-    } else { // minimizing player
-      if (Gameboard.lineOfThree(currentPlayer.marker, board)) {
-        return -1;
-      } else if (Gameboard.lineOfThree(otherPlayer.marker, board)) {
-        return 1;
-      } else {
-        return 0;
-      }
+    if (Gameboard.lineOfThree(currentPlayer.marker, board)) {
+      return 1;
+    } else if (Gameboard.lineOfThree(otherPlayer.marker, board)) {
+      return -1;
+    } else {
+      return 0;
     }
   };
 
-  const minimax = (board, depth, maximizingPlayer, currentPlayer) => {
-    if (depth === 0 || Gameboard.isFull(board)) {
-      return evaluatePotentialBoard(board, currentPlayer, maximizingPlayer)
+  const negamax = (node, depth, color, currentPlayer) => {
+    if (depth === 0 || Gameboard.isFull(node)) {
+      return color * evaluatePotentialBoard(board, currentPlayer)
     }
-
-    if (maximizingPlayer) {
-      let value = Number.NEGATIVE_INFINITY
-      const children = generateNextBoardStates(currentPlayer, board);
+    let value = Number.NEGATIVE_INFINITY;
+    const children = generateNextBoardStates(node);
+    for (let i = 0; i < children.length; i++) {
       currentPlayer = currentPlayer === player1 ? player2 : player1
-      for (let i = 0; i < children.length; i++) {
-        value = Math.max(value, minimax(children[i], depth - 1, false, currentPlayer))
-      }
-      return value;
-    } else {
-      let value = Number.POSITIVE_INFINITY;
-      const children = generateNextBoardStates(currentPlayer, board);
-      currentPlayer = currentPlayer === player1 ? player2 : player1
-      for (let i = 0; i < children.length; i++) {
-        value = Math.min(value, minimax(children[i], depth - 1, true, currentPlayer))
-      }
-      return value;
+      value = Math.max(
+        value,
+        -negamax(children[i], depth - 1, -color, currentPlayer))
     }
-
-  }
+    return value
+  };
 
   const _playComputer = (index) => {
     player1.markBoard(index);
     _toggleCurrentPlayer(player1);
-    player2.markBoard();
+    player2.smartMarkBoard();
     _toggleCurrentPlayer(player2);
   };
 
@@ -326,7 +306,7 @@ const game = (player1, player2, AI = false) => {
 
   return {
     update,
-    minimax,
+    negamax,
     generateNextBoardStates,
     evaluatePotentialBoard,
     currentPlayerMarker,
