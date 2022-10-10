@@ -243,19 +243,32 @@ const game = (player1, player2, AI = false) => {
     return result;
   };
 
-  const evaluatePotentialBoard = (board, player) => {
-    if (Gameboard.lineOfThree(player.marker, board)) {
-      return 1;
+  const evaluatePotentialBoard = (board, currentPlayer, maximizingPlayer) => {
+    const otherPlayer = currentPlayer === state.players[0] ?
+      state.players[1] :
+      state.players[0]
+    if (maximizingPlayer) {
+      if (Gameboard.lineOfThree(currentPlayer.marker, board)) {
+        return 1;
+      } else if (Gameboard.lineOfThree(otherPlayer.marker, board)) {
+        return -1;
+      } else {
+        return 0;
+      }
+    } else { // minimizing player
+      if (Gameboard.lineOfThree(currentPlayer.marker, board)) {
+        return -1;
+      } else if (Gameboard.lineOfThree(otherPlayer.marker, board)) {
+        return 1;
+      } else {
+        return 0;
+      }
     }
-    if (Gameboard.lineOfThree(player.marker, board)) {
-      return -1;
-    }
-    return 0;
   };
 
-  const minimax = (board, depth, maximizingPlayer, currentPlayer ) => {
+  const minimax = (board, depth, maximizingPlayer, currentPlayer) => {
     if (depth === 0 || Gameboard.isFull(board)) {
-      return evaluatePotentialBoard(board, currentPlayer)
+      return evaluatePotentialBoard(board, currentPlayer, maximizingPlayer)
     }
 
     if (maximizingPlayer) {
