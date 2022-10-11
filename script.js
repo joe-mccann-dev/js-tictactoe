@@ -179,10 +179,10 @@ const computerPlayer = (marker = 'o') => {
 
   const smartMarkBoard = () => {
     if (currentGame.state.isOver()) { return; }
-    const boards = currentGame.generateNextBoardStates(currentGame.state.players[1]);
-    for (let i = 0; i < boards.length; i++) {
-      console.log(currentGame.negamax(boards[i], boards.length, -1, currentGame.state.players[1]))
-    }
+    const comp = currentGame.state.players[1]
+    const boards = currentGame.generateNextBoardStates(comp);
+    const result = currentGame.negamax(boards, boards.length, -1, comp)
+    return result;
   };
 
   const _findAvailableIndexes = (cells = Gameboard.cells) => {
@@ -258,18 +258,19 @@ const game = (player1, player2, AI = false) => {
     }
   };
 
-  const negamax = (node, depth, color, currentPlayer) => {
-    if (depth === 0 || Gameboard.isFull(node)) {
-      return color * evaluatePotentialBoard(board, currentPlayer)
+  const negamax = (nodes, depth, color, currentPlayer) => {
+    const node = nodes[0]
+    if (nodes.length === 0 || depth === 0 || Gameboard.isFull(node)) {
+      return color * evaluatePotentialBoard(node, currentPlayer)
     }
+    
     let value = Number.NEGATIVE_INFINITY;
-    const children = generateNextBoardStates(node);
-    for (let i = 0; i < children.length; i++) {
-      currentPlayer = currentPlayer === player1 ? player2 : player1
-      value = Math.max(
-        value,
-        -negamax(children[i], depth - 1, -color, currentPlayer))
-    }
+    currentPlayer = currentPlayer === player1 ? player2 : player1
+    value = Math.max(
+      value,
+      -negamax(nodes.slice(1, nodes.length), depth - 1, -color, currentPlayer)
+      )
+    
     return value
   };
 
