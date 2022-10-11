@@ -180,9 +180,23 @@ const computerPlayer = (marker = 'o') => {
   const smartMarkBoard = () => {
     if (currentGame.state.isOver()) { return; }
     const comp = currentGame.state.players[1]
+    const human = currentGame.state.players[0]
     const boards = currentGame.generateNextBoardStates(comp);
-    const result = currentGame.negamax(boards, boards.length, -1, comp)
+    const result = currentGame.negamax(boards, boards.length, 1, comp)
+    console.log(currentGame.state.negamaxBoards);
+    const indexToMark = determineNegamaxMove(result);
+    Gameboard.update(marker, indexToMark);
+    DisplayController.updateDOM(indexToMark);
     return result;
+  };
+
+  const determineNegamaxMove = (value) => {
+    const board = currentGame.state.negamaxBoards[value];
+    for (let i = 0; i < board.length; i++) {
+      if (Gameboard.cells[i] === '') {
+        return i
+      }
+    }
   };
 
   const _findAvailableIndexes = (cells = Gameboard.cells) => {
@@ -209,11 +223,13 @@ const game = (player1, player2, AI = false) => {
     currentPlayer: player1,
     result: 'draw',
     AIGame: AI,
+    negamaxPlayer: player2,
+    negamaxBoards: {},
     isOver: function () { return this.winnerExists() || this.isTied() },
-    winnerExists: () => {
+    winnerExists: (board = Gameboard.cells) => {
       return (
-        Gameboard.lineOfThree(player1.marker) ||
-        Gameboard.lineOfThree(player2.marker)
+        Gameboard.lineOfThree(player1.marker, board) ||
+        Gameboard.lineOfThree(player2.marker, board)
       )
     },
     isTied: (board = Gameboard.cells) => {
@@ -245,32 +261,39 @@ const game = (player1, player2, AI = false) => {
     return result;
   };
 
-  const evaluatePotentialBoard = (board, currentPlayer) => {
-    const otherPlayer = currentPlayer === state.players[0] ?
+  const evaluatePotentialBoard = (board) => {
+    const otherPlayer = state.negamaxPlayer === state.players[0] ?
       state.players[1] :
       state.players[0]
-    if (Gameboard.lineOfThree(currentPlayer.marker, board)) {
-      return 1;
+    let result;
+    if (Gameboard.lineOfThree(state.negamaxPlayer.marker, board)) {
+      result = 1;
     } else if (Gameboard.lineOfThree(otherPlayer.marker, board)) {
-      return -1;
+      result = -1;
     } else {
-      return 0;
+      result = 0;
     }
+    state.negamaxBoards[[result]] = board;
+    return result;
   };
 
-  const negamax = (nodes, depth, color, currentPlayer) => {
+  const negamax = (nodes, depth, color) => {
     const node = nodes[0]
-    if (nodes.length === 0 || depth === 0 || Gameboard.isFull(node)) {
-      return color * evaluatePotentialBoard(node, currentPlayer)
+    if (
+      nodes.length === 0 || depth === 0 ||
+      Gameboard.isFull(node) || state.winnerExists(node)
+    ) {
+      return color * evaluatePotentialBoard(node)
     }
-    
+
     let value = Number.NEGATIVE_INFINITY;
-    currentPlayer = currentPlayer === player1 ? player2 : player1
     value = Math.max(
       value,
-      -negamax(nodes.slice(1, nodes.length), depth - 1, -color, currentPlayer)
-      )
-    
+      -negamax(nodes.slice(1, nodes.length), depth - 1, -color)
+    )
+
+    state.negamaxPlayer = state.negamaxPlayer === state.players[0] ? state.players[1] : state.players[0]
+
     return value
   };
 
