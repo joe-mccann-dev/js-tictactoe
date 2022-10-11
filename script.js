@@ -180,20 +180,19 @@ const computerPlayer = (marker = 'o') => {
   const smartMarkBoard = () => {
     if (currentGame.state.isOver()) { return; }
     const comp = currentGame.state.players[1]
-    const human = currentGame.state.players[0]
     const boards = currentGame.generateNextBoardStates(comp);
     const result = currentGame.negamax(boards, boards.length, 1, comp)
-    console.log(currentGame.state.negamaxBoards);
     const indexToMark = determineNegamaxMove(result);
     Gameboard.update(marker, indexToMark);
     DisplayController.updateDOM(indexToMark);
-    return result;
+    return indexToMark;
   };
 
   const determineNegamaxMove = (value) => {
-    const board = currentGame.state.negamaxBoards[value];
+    board = currentGame.state.negamaxBoards[0][value]
+    console.log(board)
     for (let i = 0; i < board.length; i++) {
-      if (Gameboard.cells[i] === '') {
+      if (board[i] !== Gameboard.cells[i]) {
         return i
       }
     }
@@ -223,8 +222,8 @@ const game = (player1, player2, AI = false) => {
     currentPlayer: player1,
     result: 'draw',
     AIGame: AI,
-    negamaxPlayer: player2,
-    negamaxBoards: {},
+    negamaxPlayer: player1,
+    negamaxBoards: [],
     isOver: function () { return this.winnerExists() || this.isTied() },
     winnerExists: (board = Gameboard.cells) => {
       return (
@@ -273,15 +272,18 @@ const game = (player1, player2, AI = false) => {
     } else {
       result = 0;
     }
-    state.negamaxBoards[[result]] = board;
+    console.log("result:", result)
+    const resultObject = {[result]: board}
+    console.log("resultObject:", resultObject)
+    state.negamaxBoards.push(resultObject);
     return result;
   };
 
   const negamax = (nodes, depth, color) => {
     const node = nodes[0]
     if (
-      nodes.length === 0 || depth === 0 ||
-      Gameboard.isFull(node) || state.winnerExists(node)
+      nodes.length === 1 || depth === 0 ||
+      Gameboard.isFull(node) || Gameboard.lineOfThree(state.negamaxPlayer, node)
     ) {
       return color * evaluatePotentialBoard(node)
     }
@@ -292,7 +294,9 @@ const game = (player1, player2, AI = false) => {
       -negamax(nodes.slice(1, nodes.length), depth - 1, -color)
     )
 
-    state.negamaxPlayer = state.negamaxPlayer === state.players[0] ? state.players[1] : state.players[0]
+    state.negamaxPlayer = state.negamaxPlayer === state.players[0] ? 
+      state.players[1] : 
+      state.players[0]
 
     return value
   };
@@ -300,6 +304,7 @@ const game = (player1, player2, AI = false) => {
   const _playComputer = (index) => {
     player1.markBoard(index);
     _toggleCurrentPlayer(player1);
+    setTimeout(() => {})
     player2.smartMarkBoard();
     _toggleCurrentPlayer(player2);
   };
