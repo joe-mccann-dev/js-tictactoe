@@ -152,7 +152,24 @@ const Gameboard =
 
       const openSpaceCount = () => cells.filter(c => c === '').length;
 
-      return { cells, winningLine, update, lineOfThree, isFull, reset, openSpaceCount };
+      const availableIndexes = (board = cells) => {
+        const openIndexes = [];
+        for (let index = 0; index < board.length; index++) {
+          if (board[index] === '') { openIndexes.push(index); }
+        }
+        return openIndexes;
+      };
+
+      return {
+        cells,
+        winningLine,
+        update,
+        lineOfThree,
+        isFull,
+        reset,
+        openSpaceCount,
+        availableIndexes
+      };
     })();
 
 // tells Gameboard where to mark
@@ -173,7 +190,7 @@ const computerPlayer = (marker = 'o') => {
   const markBoard = () => {
     if (currentGame.state.isOver()) { return; }
 
-    const legalIndexes = _findAvailableIndexes();
+    const legalIndexes = Gameboard.availableIndexes();
     const randomIndex = _getRandomInt(legalIndexes.length);
     const indexToMark = legalIndexes[randomIndex];
     Gameboard.update(marker, indexToMark);
@@ -190,14 +207,6 @@ const computerPlayer = (marker = 'o') => {
     Gameboard.update(marker, indexToMark);
     DisplayController.updateDOM(indexToMark);
     return indexToMark;
-  };
-
-  const _findAvailableIndexes = (cells = Gameboard.cells) => {
-    const openIndexes = [];
-    for (let index = 0; index < cells.length; index++) {
-      if (cells[index] === '') { openIndexes.push(index); }
-    }
-    return openIndexes;
   };
 
   const _getRandomInt = (max) => Math.floor(Math.random() * max);
@@ -245,14 +254,13 @@ const game = (player1, player2, AI = false) => {
 
 
   const evaluateBoard = (board) => {
-    let result = 0;
     if (Gameboard.lineOfThree(player1.marker, board)) {
-      result = 1
+      return 1;
     }
     if (Gameboard.lineOfThree(player2.marker, board)) {
-      result = -1
+      return -1;
     }
-    return result;
+    return 0;
   };
 
   const minimax = (board, depth, maximizingPlayer) => {
@@ -265,7 +273,7 @@ const game = (player1, player2, AI = false) => {
 
     let result;
     if (maximizingPlayer) {
-      const availableMoves = findAvailableIndexes(board);
+      const availableMoves = Gameboard.availableIndexes(board);
       availableMoves.forEach(move => {
         const potentialBoard = nextBoardState(board, move, 'x');
         scores.push(minimax(potentialBoard, depth - 1, false));
@@ -276,7 +284,7 @@ const game = (player1, player2, AI = false) => {
       state.minimaxChoice = moves[maxScoreIndex];
       result = scores[maxScoreIndex];
     } else {
-      const availableMoves = findAvailableIndexes(board);
+      const availableMoves = Gameboard.availableIndexes(board);
       availableMoves.forEach(move => {
         const potentialBoard = nextBoardState(board, move, 'o');
         scores.push(minimax(potentialBoard, depth - 1, true));
@@ -290,16 +298,8 @@ const game = (player1, player2, AI = false) => {
     return result
   };
 
-  const findAvailableIndexes = (cells = Gameboard.cells) => {
-    const openIndexes = [];
-    for (let index = 0; index < cells.length; index++) {
-      if (cells[index] === '') { openIndexes.push(index); }
-    }
-    return openIndexes;
-  };
-
   const nextBoardState = (board, move, marker) => {
-    boardCopy = board.map((m) => m);
+    boardCopy = board.map(m => m);
     boardCopy[move] = marker;
     return boardCopy;
   };
