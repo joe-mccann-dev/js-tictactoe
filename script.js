@@ -254,12 +254,8 @@ const game = (player1, player2, AI = false) => {
 
 
   const evaluateBoard = (board) => {
-    if (Gameboard.lineOfThree(player1.marker, board)) {
-      return 1;
-    }
-    if (Gameboard.lineOfThree(player2.marker, board)) {
-      return -1;
-    }
+    if (Gameboard.lineOfThree(player1.marker, board)) { return 1; }
+    if (Gameboard.lineOfThree(player2.marker, board)) { return -1;}
     return 0;
   };
 
@@ -268,25 +264,23 @@ const game = (player1, player2, AI = false) => {
 
     const scores = [];
     const moves = [];
-
     const availableMoves = Gameboard.availableIndexes(board);
-    if (maximizingPlayer) {
+
+    const gatherScoresForMoves = (marker, maximizingPlayer) => {
       availableMoves.forEach(move => {
-        const potentialBoard = nextBoardState(board, move, 'x');
-        scores.push(minimax(potentialBoard, depth - 1, false));
+        const potentialBoard = nextBoardState(board, move, marker);
+        scores.push(minimax(potentialBoard, depth - 1, maximizingPlayer));
         moves.push(move)
       });
+    };
 
+    if (maximizingPlayer) {
+      gatherScoresForMoves('x', false);
       const maxScoreIndex = scores.indexOf(Math.max(...scores));
       state.minimaxChoice = moves[maxScoreIndex];
       return scores[maxScoreIndex];
     } else {
-      availableMoves.forEach(move => {
-        const potentialBoard = nextBoardState(board, move, 'o');
-        scores.push(minimax(potentialBoard, depth - 1, true));
-        moves.push(move)
-      });
-
+      gatherScoresForMoves('o', true)
       const minScoreIndex = scores.indexOf(Math.min(...scores));
       state.minimaxChoice = moves[minScoreIndex];
       return scores[minScoreIndex];
