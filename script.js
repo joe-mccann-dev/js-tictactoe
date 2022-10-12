@@ -8,53 +8,6 @@
 // currentGame.update calls currentPlayer.markBoard;
 // Gameboard object is updated.
 
-const Gameboard =
-  (
-    (
-      cells = [
-        '', '', '',
-        '', '', '',
-        '', '', ''
-      ]
-    ) => {
-      const winLines = [
-        [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6],
-        [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]
-      ];
-
-      const winningLine = { 'current': [] };
-
-
-      const lineOfThree = (marker, board = cells) => {
-        return (
-          winLines.some(line => {
-            if (
-              [board[line[0]], board[line[1]], board[line[2]]]
-                .every(c => c === marker)
-            ) {
-              winningLine['current'] = line;
-              return true;
-            }
-          })
-        );
-      };
-
-      const isFull = (board = cells) => board.every(c => c !== '');
-
-      const update = (marker, index) => {
-        if (cells[index] === '') { cells[index] = marker; }
-        return cells;
-      };
-
-      const reset = () => {
-        for (let i in cells) {
-          cells[i] = '';
-        }
-      };
-
-      return { cells, winningLine, update, lineOfThree, isFull, reset };
-    })();
-
 // controls DOM manipulation
 // updates DOM and then updates the game state 
 const DisplayController = (() => {
@@ -152,6 +105,54 @@ const DisplayController = (() => {
   };
 })();
 
+
+const Gameboard =
+  (
+    (
+      cells = [
+        '', '', '',
+        '', '', '',
+        '', '', ''
+      ]
+    ) => {
+      const winLines = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6],
+        [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]
+      ];
+
+      const winningLine = { 'current': [] };
+
+
+      const lineOfThree = (marker, board = cells) => {
+        return (
+          winLines.some(line => {
+            if (
+              [board[line[0]], board[line[1]], board[line[2]]]
+                .every(c => c === marker)
+            ) {
+              winningLine['current'] = line;
+              return true;
+            }
+          })
+        );
+      };
+
+      const isFull = (board = cells) => board.every(c => c !== '');
+
+      const update = (marker, index) => {
+        if (cells[index] === '') { cells[index] = marker; }
+        return cells;
+      };
+
+      const reset = () => {
+        for (let i in cells) {
+          cells[i] = '';
+        }
+      };
+
+      return { cells, winningLine, update, lineOfThree, isFull, reset };
+    })();
+
 // tells Gameboard where to mark
 const player = (marker, name) => {
   const markBoard = (index) => Gameboard.update(marker, index);
@@ -223,7 +224,9 @@ const game = (player1, player2, AI = false) => {
     AIGame: AI,
     negamaxPlayer: player1,
     negamaxBoards: [],
-    isOver: function () { return this.winnerExists() || this.isTied() },
+    isOver: function (board = Gameboard.cells) {
+      return this.winnerExists(board) || this.isTied(board)
+    },
     winnerExists: (board = Gameboard.cells) => {
       return (
         Gameboard.lineOfThree(player1.marker, board) ||
@@ -264,7 +267,7 @@ const game = (player1, player2, AI = false) => {
     const generate = () => {
       const comp = state.players[1];
       const human = state.players[0];
-      
+
       const compBoards = nextBoardStates(comp);
       const reactiveHumanBoards = [];
       for (let i = 0; i < compBoards.length; i++) {
@@ -272,32 +275,27 @@ const game = (player1, player2, AI = false) => {
         reactiveHumanBoards.push(reactiveHumanBoard)
       }
 
-      const tree = new Map()
 
-      for (let i = 0; i < compBoards.length; i++) {
-        tree.set(compBoards[i], reactiveHumanBoards[i])
-      }
 
-      return tree
+      return reactiveHumanBoards.flat();
     };
 
-    return { generate }
+    return { generate, nextBoardStates }
   };
 
-  const evaluatePotentialBoard = (board) => {
-    const otherPlayer = state.negamaxPlayer === state.players[0] ?
-      state.players[1] :
-      state.players[0]
+  const evaluateBoard = (board) => {
+    console.log("player1 is:", player1)
     let result;
-    if (Gameboard.lineOfThree(state.negamaxPlayer.marker, board)) {
+    // comp is player2, comp wants to go wherever it's best for X
+    // because comp is always minimizing player
+    if (Gameboard.lineOfThree(player1.marker, board)) {
       result = 1;
-    } else if (Gameboard.lineOfThree(otherPlayer.marker, board)) {
+    } else if (Gameboard.lineOfThree(player2.marker, board)) {
       result = -1;
     } else {
       result = 0;
     }
-    const resultObject = {[result]: board}
-    state.negamaxBoards.push(resultObject);
+
     return result;
   };
 
@@ -305,9 +303,9 @@ const game = (player1, player2, AI = false) => {
     const node = nodes[0]
     if (
       nodes.length === 1 || depth === 0 ||
-      Gameboard.isFull(node) || Gameboard.lineOfThree(state.negamaxPlayer, node)
+      state.isOver(node)
     ) {
-      return color * evaluatePotentialBoard(node)
+      return color * evaluateBoard(node)
     }
 
     let value = Number.NEGATIVE_INFINITY;
@@ -316,17 +314,13 @@ const game = (player1, player2, AI = false) => {
       -negamax(nodes.slice(1, nodes.length), depth - 1, -color)
     )
 
-    state.negamaxPlayer = state.negamaxPlayer === state.players[0] ? 
-      state.players[1] : 
-      state.players[0]
-
     return value
   };
 
   const _playComputer = (index) => {
     player1.markBoard(index);
     _toggleCurrentPlayer(player1);
-    setTimeout(() => {})
+    setTimeout(() => { })
     player2.smartMarkBoard();
     _toggleCurrentPlayer(player2);
   };
@@ -358,7 +352,7 @@ const game = (player1, player2, AI = false) => {
   return {
     update,
     negamax,
-    evaluatePotentialBoard,
+    evaluateBoard,
     currentPlayerMarker,
     state,
     gameTree
