@@ -274,9 +274,6 @@ const game = (player1, player2, AI = false) => {
         const reactiveHumanBoard = nextBoardStates(human, compBoards[i])
         reactiveHumanBoards.push(reactiveHumanBoard)
       }
-
-
-
       return reactiveHumanBoards.flat();
     };
 
@@ -284,18 +281,15 @@ const game = (player1, player2, AI = false) => {
   };
 
   const evaluateBoard = (board) => {
-    console.log("player1 is:", player1)
-    let result;
+    let result = 0;
     // comp is player2, comp wants to go wherever it's best for X
     // because comp is always minimizing player
     if (Gameboard.lineOfThree(player1.marker, board)) {
       result = 1;
-    } else if (Gameboard.lineOfThree(player2.marker, board)) {
-      result = -1;
-    } else {
-      result = 0;
     }
-
+    if (Gameboard.lineOfThree(player2.marker, board)) {
+      result = -1;
+    }
     return result;
   };
 
