@@ -180,22 +180,12 @@ const computerPlayer = (marker = 'o') => {
 
   const smartMarkBoard = () => {
     if (currentGame.state.isOver()) { return; }
-    const comp = currentGame.state.players[1]
-    const boards = currentGame.generateNextBoardStates(comp);
-    const result = currentGame.negamax(boards, boards.length, 1)
-    const indexToMark = determineNegamaxMove(result);
+    const boards = currentGame.gameTree().generate()
+    currentGame.negamax(boards, boards.length, 1)
+    const indexToMark = currentGame.state.whereXWantsToGo;
     Gameboard.update(marker, indexToMark);
     DisplayController.updateDOM(indexToMark);
     return indexToMark;
-  };
-
-  const determineNegamaxMove = (value) => {
-    board = currentGame.state.negamaxBoards[0][value]
-    for (let i = 0; i < board.length; i++) {
-      if (board[i] !== Gameboard.cells[i]) {
-        return i
-      }
-    }
   };
 
   const _findAvailableIndexes = (cells = Gameboard.cells) => {
@@ -223,7 +213,7 @@ const game = (player1, player2, AI = false) => {
     result: 'draw',
     AIGame: AI,
     negamaxPlayer: player1,
-    negamaxBoards: [],
+    whereXWantsToGo: 0,
     isOver: function (board = Gameboard.cells) {
       return this.winnerExists(board) || this.isTied(board)
     },
@@ -299,7 +289,9 @@ const game = (player1, player2, AI = false) => {
       nodes.length === 1 || depth === 0 ||
       state.isOver(node)
     ) {
-      return color * evaluateBoard(node)
+      const score = color * evaluateBoard(node)
+      state.whereXWantsToGo = determineNegamaxMove(node)
+      return score;
     }
 
     let value = Number.NEGATIVE_INFINITY;
@@ -307,8 +299,16 @@ const game = (player1, player2, AI = false) => {
       value,
       -negamax(nodes.slice(1, nodes.length), depth - 1, -color)
     )
-
+    
     return value
+  };
+
+  const determineNegamaxMove = (board) => {
+    for (let i = 0; i < board.length; i++) {
+      if (board[i] !== Gameboard.cells[i] && board[i] !== 'o') {
+        return i;
+      }
+    }
   };
 
   const _playComputer = (index) => {
