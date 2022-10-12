@@ -181,7 +181,7 @@ const computerPlayer = (marker = 'o') => {
     if (currentGame.state.isOver()) { return; }
     const comp = currentGame.state.players[1]
     const boards = currentGame.generateNextBoardStates(comp);
-    const result = currentGame.negamax(boards, boards.length, 1, comp)
+    const result = currentGame.negamax(boards, boards.length, 1)
     const indexToMark = determineNegamaxMove(result);
     Gameboard.update(marker, indexToMark);
     DisplayController.updateDOM(indexToMark);
@@ -190,7 +190,6 @@ const computerPlayer = (marker = 'o') => {
 
   const determineNegamaxMove = (value) => {
     board = currentGame.state.negamaxBoards[0][value]
-    console.log(board)
     for (let i = 0; i < board.length; i++) {
       if (board[i] !== Gameboard.cells[i]) {
         return i
@@ -247,17 +246,42 @@ const game = (player1, player2, AI = false) => {
     if (state.isOver()) { _performEndGameTasks(state); }
   };
 
-  const generateNextBoardStates = (player, board = Gameboard.cells) => {
-    const result = [];
-    const gameBoardCopy = Gameboard.cells.map(m => m);
-    for (let i = 0; i < gameBoardCopy.length; i++) {
-      const copy = gameBoardCopy.map(m => m);
-      if (gameBoardCopy[i] === '') {
-        copy[i] = player.marker;
-        result.push(copy);
-      }
+  const gameTree = () => {
+
+    const nextBoardStates = (player, board = Gameboard.cells) => {
+      const result = [];
+      const gameBoardCopy = board.map(m => m);
+      for (let i = 0; i < gameBoardCopy.length; i++) {
+        const copy = gameBoardCopy.map(m => m);
+        if (gameBoardCopy[i] === '') {
+          copy[i] = player.marker;
+          result.push(copy);
+        }
+      };
+      return result;
     };
-    return result;
+
+    const generate = () => {
+      const comp = state.players[1];
+      const human = state.players[0];
+      
+      const compBoards = nextBoardStates(comp);
+      const reactiveHumanBoards = [];
+      for (let i = 0; i < compBoards.length; i++) {
+        const reactiveHumanBoard = nextBoardStates(human, compBoards[i])
+        reactiveHumanBoards.push(reactiveHumanBoard)
+      }
+
+      const tree = new Map()
+
+      for (let i = 0; i < compBoards.length; i++) {
+        tree.set(compBoards[i], reactiveHumanBoards[i])
+      }
+
+      return tree
+    };
+
+    return { generate }
   };
 
   const evaluatePotentialBoard = (board) => {
@@ -272,9 +296,7 @@ const game = (player1, player2, AI = false) => {
     } else {
       result = 0;
     }
-    console.log("result:", result)
     const resultObject = {[result]: board}
-    console.log("resultObject:", resultObject)
     state.negamaxBoards.push(resultObject);
     return result;
   };
@@ -336,10 +358,10 @@ const game = (player1, player2, AI = false) => {
   return {
     update,
     negamax,
-    generateNextBoardStates,
     evaluatePotentialBoard,
     currentPlayerMarker,
     state,
+    gameTree
   };
 };
 
