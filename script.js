@@ -264,16 +264,14 @@ const game = (player1, player2, AI = false) => {
   };
 
   const minimax = (board, depth, maximizingPlayer) => {
-    if (depth === 0 || state.isOver(board)) {
-      return evaluateBoard(board)
-    }
-
+    if (depth === 0 || state.isOver(board)) { return evaluateBoard(board) }
+    
     const scores = [];
     const moves = [];
-
     let result;
+
+    const availableMoves = Gameboard.availableIndexes(board);
     if (maximizingPlayer) {
-      const availableMoves = Gameboard.availableIndexes(board);
       availableMoves.forEach(move => {
         const potentialBoard = nextBoardState(board, move, 'x');
         scores.push(minimax(potentialBoard, depth - 1, false));
@@ -284,7 +282,6 @@ const game = (player1, player2, AI = false) => {
       state.minimaxChoice = moves[maxScoreIndex];
       result = scores[maxScoreIndex];
     } else {
-      const availableMoves = Gameboard.availableIndexes(board);
       availableMoves.forEach(move => {
         const potentialBoard = nextBoardState(board, move, 'o');
         scores.push(minimax(potentialBoard, depth - 1, true));
