@@ -181,8 +181,19 @@ const computerPlayer = (marker = 'o') => {
   const smartMarkBoard = () => {
     if (currentGame.state.isOver()) { return; }
     const boards = currentGame.gameTree().generate()
-    currentGame.negamax(boards, boards.length, 1)
-    const indexToMark = currentGame.state.whereXWantsToGo;
+    const cpuBoards = currentGame.gameTree().generateCPU();
+    const openSpaces = Gameboard.cells.filter((c) => c === '').length
+    humanResult = currentGame.negamax(boards, openSpaces, 1)
+    cpuResult = currentGame.negamax(cpuBoards, openSpaces, 1)
+    console.log("humanresult: ", humanResult)
+    console.log("cpuResult: ", cpuResult);
+    let indexToMark
+    if (humanResult >= cpuResult) {
+      indexToMark = currentGame.state.moves.at(-2);
+    } else {
+      indexToMark = currentGame.state.moves.at(-1)
+    }
+   
     Gameboard.update(marker, indexToMark);
     DisplayController.updateDOM(indexToMark);
     return indexToMark;
@@ -213,7 +224,7 @@ const game = (player1, player2, AI = false) => {
     result: 'draw',
     AIGame: AI,
     negamaxPlayer: player1,
-    whereXWantsToGo: 0,
+    moves: [],
     isOver: function (board = Gameboard.cells) {
       return this.winnerExists(board) || this.isTied(board)
     },
@@ -267,7 +278,20 @@ const game = (player1, player2, AI = false) => {
       return reactiveHumanBoards.flat();
     };
 
-    return { generate, nextBoardStates }
+    const generateCPU = () => {
+      const comp = state.players[1];
+      const human = state.players[0];
+
+      const humanBoards = nextBoardStates(human);
+      const reactiveCPUBoards = [];
+      for (let i = 0; i < humanBoards.length; i++) {
+        const reactiveCPUBoard = nextBoardStates(comp, humanBoards[i]);
+        reactiveCPUBoards.push(reactiveCPUBoard);
+      }
+      return reactiveCPUBoards.flat();
+    };
+
+    return { generate, generateCPU, nextBoardStates }
   };
 
   const evaluateBoard = (board) => {
@@ -290,7 +314,8 @@ const game = (player1, player2, AI = false) => {
       state.isOver(node)
     ) {
       const score = color * evaluateBoard(node)
-      state.whereXWantsToGo = determineNegamaxMove(node)
+      state.moves.push(determineNegamaxMove(node))
+      console.log("state.moves:", state.moves)
       return score;
     }
 
