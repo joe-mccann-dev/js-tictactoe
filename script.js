@@ -225,7 +225,6 @@ const game = (player1, player2, AI = false) => {
     currentPlayer: player1,
     result: 'draw',
     AIGame: AI,
-    moves: [],
     minimaxChoice: null,
     isOver: function (board = Gameboard.cells) {
       return this.winnerExists(board) || this.isTied(board)
@@ -252,7 +251,6 @@ const game = (player1, player2, AI = false) => {
     if (state.isOver()) { _performEndGameTasks(state); }
   };
 
-
   const evaluateBoard = (board) => {
     if (Gameboard.lineOfThree(player1.marker, board)) { return 1; }
     if (Gameboard.lineOfThree(player2.marker, board)) { return -1;}
@@ -268,7 +266,7 @@ const game = (player1, player2, AI = false) => {
 
     const gatherScoresForMoves = (marker, maximizingPlayer) => {
       availableMoves.forEach(move => {
-        const potentialBoard = nextBoardState(board, move, marker);
+        const potentialBoard = _nextBoardState(board, move, marker);
         scores.push(minimax(potentialBoard, depth - 1, maximizingPlayer));
         moves.push(move)
       });
@@ -287,7 +285,7 @@ const game = (player1, player2, AI = false) => {
     }
   };
 
-  const nextBoardState = (board, move, marker) => {
+  const _nextBoardState = (board, move, marker) => {
     boardCopy = board.map(m => m);
     boardCopy[move] = marker;
     return boardCopy;
