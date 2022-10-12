@@ -150,7 +150,9 @@ const Gameboard =
         }
       };
 
-      return { cells, winningLine, update, lineOfThree, isFull, reset };
+      const openSpaceCount = () => cells.filter(c => c === '').length;
+
+      return { cells, winningLine, update, lineOfThree, isFull, reset, openSpaceCount };
     })();
 
 // tells Gameboard where to mark
@@ -180,20 +182,11 @@ const computerPlayer = (marker = 'o') => {
 
   const smartMarkBoard = () => {
     if (currentGame.state.isOver()) { return; }
-    const boards = currentGame.gameTree().generate()
-    const cpuBoards = currentGame.gameTree().generateCPU();
-    const openSpaces = Gameboard.cells.filter((c) => c === '').length
-    humanResult = currentGame.negamax(boards, openSpaces, 1)
-    cpuResult = currentGame.negamax(cpuBoards, openSpaces, 1)
-    console.log("humanresult: ", humanResult)
-    console.log("cpuResult: ", cpuResult);
-    let indexToMark
-    if (humanResult >= cpuResult) {
-      indexToMark = currentGame.state.moves.at(-2);
-    } else {
-      indexToMark = currentGame.state.moves.at(-1)
-    }
-   
+
+    const openSpaces = Gameboard.openSpaceCount();
+    currentGame.minimax(Gameboard.cells, openSpaces, false)
+    const indexToMark = currentGame.state.minimaxChoice
+
     Gameboard.update(marker, indexToMark);
     DisplayController.updateDOM(indexToMark);
     return indexToMark;
@@ -223,8 +216,8 @@ const game = (player1, player2, AI = false) => {
     currentPlayer: player1,
     result: 'draw',
     AIGame: AI,
-    negamaxPlayer: player1,
     moves: [],
+    minimaxChoice: null,
     isOver: function (board = Gameboard.cells) {
       return this.winnerExists(board) || this.isTied(board)
     },
@@ -250,96 +243,70 @@ const game = (player1, player2, AI = false) => {
     if (state.isOver()) { _performEndGameTasks(state); }
   };
 
-  const gameTree = () => {
-
-    const nextBoardStates = (player, board = Gameboard.cells) => {
-      const result = [];
-      const gameBoardCopy = board.map(m => m);
-      for (let i = 0; i < gameBoardCopy.length; i++) {
-        const copy = gameBoardCopy.map(m => m);
-        if (gameBoardCopy[i] === '') {
-          copy[i] = player.marker;
-          result.push(copy);
-        }
-      };
-      return result;
-    };
-
-    const generate = () => {
-      const comp = state.players[1];
-      const human = state.players[0];
-
-      const compBoards = nextBoardStates(comp);
-      const reactiveHumanBoards = [];
-      for (let i = 0; i < compBoards.length; i++) {
-        const reactiveHumanBoard = nextBoardStates(human, compBoards[i])
-        reactiveHumanBoards.push(reactiveHumanBoard)
-      }
-      return reactiveHumanBoards.flat();
-    };
-
-    const generateCPU = () => {
-      const comp = state.players[1];
-      const human = state.players[0];
-
-      const humanBoards = nextBoardStates(human);
-      const reactiveCPUBoards = [];
-      for (let i = 0; i < humanBoards.length; i++) {
-        const reactiveCPUBoard = nextBoardStates(comp, humanBoards[i]);
-        reactiveCPUBoards.push(reactiveCPUBoard);
-      }
-      return reactiveCPUBoards.flat();
-    };
-
-    return { generate, generateCPU, nextBoardStates }
-  };
 
   const evaluateBoard = (board) => {
     let result = 0;
-    // comp is player2, comp wants to go wherever it's best for X
-    // because comp is always minimizing player
     if (Gameboard.lineOfThree(player1.marker, board)) {
-      result = 1;
+      result = 1
     }
     if (Gameboard.lineOfThree(player2.marker, board)) {
-      result = -1;
+      result = -1
     }
     return result;
   };
 
-  const negamax = (nodes, depth, color) => {
-    const node = nodes[0]
-    if (
-      nodes.length === 1 || depth === 0 ||
-      state.isOver(node)
-    ) {
-      const score = color * evaluateBoard(node)
-      state.moves.push(determineNegamaxMove(node))
-      console.log("state.moves:", state.moves)
-      return score;
+  const minimax = (board, depth, maximizingPlayer) => {
+    if (depth === 0 || state.isOver(board)) {
+      return evaluateBoard(board)
     }
 
-    let value = Number.NEGATIVE_INFINITY;
-    value = Math.max(
-      value,
-      -negamax(nodes.slice(1, nodes.length), depth - 1, -color)
-    )
-    
-    return value
+    const scores = [];
+    const moves = [];
+
+    let result;
+    if (maximizingPlayer) {
+      const availableMoves = findAvailableIndexes(board);
+      availableMoves.forEach(move => {
+        const potentialBoard = nextBoardState(board, move, 'x');
+        scores.push(minimax(potentialBoard, depth - 1, false));
+        moves.push(move)
+      });
+
+      const maxScoreIndex = scores.indexOf(Math.max(...scores));
+      state.minimaxChoice = moves[maxScoreIndex];
+      result = scores[maxScoreIndex];
+    } else {
+      const availableMoves = findAvailableIndexes(board);
+      availableMoves.forEach(move => {
+        const potentialBoard = nextBoardState(board, move, 'o');
+        scores.push(minimax(potentialBoard, depth - 1, true));
+        moves.push(move)
+      });
+
+      const minScoreIndex = scores.indexOf(Math.min(...scores));
+      state.minimaxChoice = moves[minScoreIndex];
+      result = scores[minScoreIndex];
+    }
+    return result
   };
 
-  const determineNegamaxMove = (board) => {
-    for (let i = 0; i < board.length; i++) {
-      if (board[i] !== Gameboard.cells[i] && board[i] !== 'o') {
-        return i;
-      }
+  const findAvailableIndexes = (cells = Gameboard.cells) => {
+    const openIndexes = [];
+    for (let index = 0; index < cells.length; index++) {
+      if (cells[index] === '') { openIndexes.push(index); }
     }
+    return openIndexes;
+  };
+
+  const nextBoardState = (board, move, marker) => {
+    boardCopy = board.map((m) => m);
+    boardCopy[move] = marker;
+    return boardCopy;
   };
 
   const _playComputer = (index) => {
     player1.markBoard(index);
     _toggleCurrentPlayer(player1);
-    setTimeout(() => { })
     player2.smartMarkBoard();
     _toggleCurrentPlayer(player2);
   };
@@ -370,11 +337,10 @@ const game = (player1, player2, AI = false) => {
 
   return {
     update,
-    negamax,
     evaluateBoard,
+    minimax,
     currentPlayerMarker,
     state,
-    gameTree
   };
 };
 
