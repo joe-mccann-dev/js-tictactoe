@@ -110,7 +110,7 @@ h1 {
   font-weight: 700;
   margin-top: 4px;
   text-transform: capitalize;
-  text-align: center;
+  text-align: -webkit-center;
   color: var(--neutral-800);
 }
 
