@@ -322,12 +322,12 @@ const game = (player1, player2, AI = false, hardMode = false) => {
     };
 
     if (maximizingPlayer) {
-      gatherScoresForMoves('x', false);
+      gatherScoresForMoves(player1.marker, false);
       const maxScoreIndex = scores.indexOf(Math.max(...scores));
       state.minimaxChoice = moves[maxScoreIndex];
       return scores[maxScoreIndex];
     } else {
-      gatherScoresForMoves('o', true)
+      gatherScoresForMoves(player2.marker, true)
       const minScoreIndex = scores.indexOf(Math.min(...scores));
       state.minimaxChoice = moves[minScoreIndex];
       return scores[minScoreIndex];
