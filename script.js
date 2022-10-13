@@ -122,16 +122,9 @@ const DisplayController = (() => {
   };
 })();
 
-
 const Gameboard =
   (
-    (
-      cells = [
-        '', '', '',
-        '', '', '',
-        '', '', ''
-      ]
-    ) => {
+    (cells = ['', '', '', '', '', '', '', '', '']) => {
       const winLines = [
         [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6],
         [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]
@@ -160,16 +153,17 @@ const Gameboard =
         return cells;
       };
 
-      const reset = () => cells.map((_c, index) => cells[index] = '')
+      const reset = () => cells.map((_c, index) => cells[index] = '');
 
       const openSpaceCount = () => cells.filter(c => c === '').length;
 
       const availableIndexes = (board = cells) => {
-        const openIndexes = [];
-        for (let index = 0; index < board.length; index++) {
-          if (board[index] === '') { openIndexes.push(index); }
-        }
-        return openIndexes;
+        return (
+          board.reduce((available, cell, index) => {
+            if (cell === '') { available.push(index) }
+            return available;
+          }, [])
+        );
       };
 
       return {
@@ -339,7 +333,7 @@ const game = (
 
   const currentPlayerMarker = () => state.currentPlayer.marker;
 
-  const update = (index) => { 
+  const update = (index) => {
     AI ? _playComputer(index) : _playHuman(index);
     _performEndGameTasks(state);
   }
