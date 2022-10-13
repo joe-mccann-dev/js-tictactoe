@@ -23,6 +23,7 @@ const DisplayController = (() => {
   const player1Score = document.querySelector('#player1_score');
   const player2Score = document.querySelector('#player2_score');
   const playComputerCheckbox = document.querySelector('#play_computer');
+  const modes = document.querySelectorAll('.mode')
 
   const highlightWinningLine = () => {
     Gameboard.winningLine['current'].forEach((index) => {
@@ -101,7 +102,8 @@ const DisplayController = (() => {
     player1Input,
     player2Input,
     resetButton,
-    playComputerCheckbox
+    playComputerCheckbox,
+    modes
   };
 })();
 
@@ -334,6 +336,7 @@ const game = (player1, player2, AI = false) => {
 
 const togglePlayer2 = (e) => {
   DisplayController.player2Input.disabled = e.target.checked ? true : false;
+  DisplayController.modes.forEach((mode) => mode.disabled = mode.disabled ? false : true)
 };
 DisplayController.playComputerCheckbox.addEventListener('click', togglePlayer2);
 

@@ -115,6 +115,11 @@ input[type="checkbox"] {
   height: 20px;
 }
 
+input[type='radio'] { 
+  margin-top: 6px;
+  transform: scale(1.4); 
+}
+
 
 .button {
   font-size: 1.2rem;
