@@ -103,11 +103,17 @@ h1 {
   background: linear-gradient(to right, var(--indigo-200), var(--yellow-200));
 }
 
+.results_container {
+   width: 100%;
+}
 .result {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
+  padding: 1px;
+  text-align: center;
+  letter-spacing: 0.2rem;
+  font-weight: bold;
+  margin-top: 4px;
   text-transform: capitalize;
-  margin-top: 2px;
-  padding: 12px;
   color: var(--neutral-800);
 }
 

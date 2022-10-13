@@ -270,18 +270,14 @@ const game = (
   const _playComputer = (index) => {
     player1.markBoard(index);
     _toggleCurrentPlayer(player1);
-    setTimeout(() => {
-      hardMode ? player2.smartMarkBoard() : player2.markBoard();
-      _toggleCurrentPlayer(player2);
-      _performEndGameTasks(state);
-    }, 150)
+    hardMode ? player2.smartMarkBoard() : player2.markBoard();
+    _toggleCurrentPlayer(player2);
   };
 
   const _playHuman = (index) => {
     const player = state.currentPlayer;
     player.markBoard(index);
     _toggleCurrentPlayer(player);
-    _performEndGameTasks(state);
   };
 
   const _performEndGameTasks = (state) => {
@@ -347,7 +343,10 @@ const game = (
 
   const currentPlayerMarker = () => state.currentPlayer.marker;
 
-  const update = (index) => { AI ? _playComputer(index) : _playHuman(index); }
+  const update = (index) => { 
+    AI ? _playComputer(index) : _playHuman(index);
+    _performEndGameTasks(state);
+  }
 
   return {
     update,

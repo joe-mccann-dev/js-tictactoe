@@ -15,6 +15,8 @@ The primary purpose of this repo is to practice using JavaScript factory functio
 
 Code is organized using IIFE modules (`Gameboard`, `DisplayController`) and JavaScript factory functions (`player`, `computerPlayer`, `game`).
 
+I decided to keep important information within the game factory's `state` object.
+
 ### Getting minimax function to align with an optimal move
 
 [My implementation of minimax](https://github.com/joe-mccann-dev/js-tictactoe/blob/main/script.js#L319)
