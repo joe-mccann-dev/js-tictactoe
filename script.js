@@ -14,16 +14,20 @@ const DisplayController = (() => {
   const boardElement = document.getElementById('gameboard');
   const resultElement = document.querySelector('.result');
   const resetButton = document.querySelector('.button_reset');
+  const resetGame = document.querySelector('.button_reset_game');
   const formContainer = document.querySelector('.form_container');
   const form = document.querySelector('#form');
   const player1Input = document.querySelector('#player1_name');
   const player2Input = document.querySelector('#player2_name');
+  const scoreContainers = document.querySelectorAll('.score_container');
   const player1NameDisplay = document.querySelector('#player1_name_display');
   const player2NameDisplay = document.querySelector('#player2_name_display');
   const player1Score = document.querySelector('#player1_score');
   const player2Score = document.querySelector('#player2_score');
   const playComputerCheckbox = document.querySelector('#play_computer');
-  const modes = document.querySelectorAll('.mode')
+  const modes = document.querySelectorAll('.mode');
+  const easyMode = document.querySelector('#easy_mode');
+  const hardMode = document.querySelector('#hard_mode');
 
   const highlightWinningLine = () => {
     Gameboard.winningLine['current'].forEach((index) => {
@@ -33,6 +37,10 @@ const DisplayController = (() => {
   };
 
   const renderBoard = () => {
+    scoreContainers.forEach(container => container.classList.remove('hidden'));
+    showScores(currentGame.state);
+    boardElement.classList.remove('hidden');
+    boardElement.classList.add('gameboard_border');
     Gameboard.cells.forEach((marker, index) => {
       const cellElement = document.createElement('div');
       _setColor(cellElement, marker);
@@ -61,14 +69,14 @@ const DisplayController = (() => {
   };
 
   const showScores = (gameState) => {
-    if (!gameState.players.some(p => p.score.wins > 0)) { return; }
-
     const player1 = gameState.players[0];
     const player2 = gameState.players[1];
     player1NameDisplay.textContent = player1.name;
-    player2NameDisplay.textContent = player2.name;
-    player1Score.classList.remove('hidden');
-    player2Score.classList.remove('hidden');
+    player2NameDisplay.textContent = currentGame.state.hardMode ?
+      `${player2.name} (hard)` :
+      `${player2.name} (easy)`
+    player1Score.classList.add('highlighted');
+    player2Score.classList.add('highlighted');
     player1Score.textContent = player1.score.wins;
     player2Score.textContent = player2.score.wins;
   };
@@ -102,8 +110,11 @@ const DisplayController = (() => {
     player1Input,
     player2Input,
     resetButton,
+    resetGame,
     playComputerCheckbox,
-    modes
+    modes,
+    easyMode,
+    hardMode
   };
 })();
 
@@ -221,14 +232,15 @@ const computerPlayer = (marker = 'o') => {
 // controls turns
 // allows players to mark board
 // determines if there is a winner or game is tied
-const game = (player1, player2, AI = false) => {
+const game = (player1, player2, AI = false, hardMode = false) => {
 
   const state = {
     players: [player1, player2],
     currentPlayer: player1,
-    result: 'draw',
     AIGame: AI,
+    hardMode: hardMode,
     minimaxChoice: null,
+    result: 'draw',
     isOver: function (board = Gameboard.cells) {
       return this.winnerExists(board) || this.isTied(board)
     },
@@ -250,7 +262,7 @@ const game = (player1, player2, AI = false) => {
   const _playComputer = (index) => {
     player1.markBoard(index);
     _toggleCurrentPlayer(player1);
-    player2.smartMarkBoard();
+    hardMode ? player2.smartMarkBoard() : player2.markBoard();
     _toggleCurrentPlayer(player2);
   };
 
@@ -280,7 +292,7 @@ const game = (player1, player2, AI = false) => {
 
   const _evaluateBoard = (board) => {
     if (Gameboard.lineOfThree(player1.marker, board)) { return 1; }
-    if (Gameboard.lineOfThree(player2.marker, board)) { return -1;}
+    if (Gameboard.lineOfThree(player2.marker, board)) { return -1; }
     return 0;
   };
 
@@ -302,7 +314,7 @@ const game = (player1, player2, AI = false) => {
         const potentialBoard = _nextBoardState(board, move, marker);
         const minimaxResult = minimax(potentialBoard, depth - 1, maximizingPlayer);
         scores.push(minimaxResult);
-        moves.push(move)
+        moves.push(move);
       });
     };
 
@@ -336,27 +348,33 @@ const game = (player1, player2, AI = false) => {
 
 const togglePlayer2 = (e) => {
   DisplayController.player2Input.disabled = e.target.checked ? true : false;
+  DisplayController.player2Input.value = '';
   DisplayController.modes.forEach((mode) => mode.disabled = mode.disabled ? false : true)
 };
+DisplayController.player2Input.disabled = true;
 DisplayController.playComputerCheckbox.addEventListener('click', togglePlayer2);
 
 let currentGame;
-DisplayController.form.addEventListener('submit', () => {
+DisplayController.form.addEventListener('submit', (e) => {
+  e.preventDefault();
+
   DisplayController.formContainer.classList.add('hidden');
   const player1Name = DisplayController.player1Input.value || 'Player1';
   const player2Name = DisplayController.player2Input.value || 'Player2';
   const wantsToPlayComputer = DisplayController.playComputerCheckbox.checked;
   if (wantsToPlayComputer) {
-    currentGame = game(player('x', player1Name), computerPlayer(), true);
+    const hardMode = DisplayController.hardMode.checked;
+    currentGame = game(player('x', player1Name), computerPlayer(), wantsToPlayComputer, hardMode);
   } else {
     currentGame = game(player('x', player1Name), player('o', player2Name));
   }
   DisplayController.renderBoard();
+  DisplayController.resetGame.classList.remove('hidden');
 });
 
 const startNewGame = () => {
   const state = currentGame.state
-  currentGame = game(state.players[0], state.players[1], state.AIGame);
+  currentGame = game(state.players[0], state.players[1], state.AIGame, state.hardMode);
   Gameboard.reset();
   DisplayController.resetButton.classList.add('hidden');
   DisplayController.resultElement.classList.add('hidden');
@@ -364,3 +382,7 @@ const startNewGame = () => {
   DisplayController.renderBoard();
 };
 DisplayController.resetButton.addEventListener('click', startNewGame);
+
+DisplayController.resetGame.addEventListener('click', () => {
+  window.location.reload();
+});

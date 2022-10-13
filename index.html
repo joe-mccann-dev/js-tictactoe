@@ -14,7 +14,7 @@
   <div class="form_container">
     <form id="form" class="form" action="#">
       <fieldset>
-        <legend>Enter player names (optional)</legend>
+        <legend>Play AI player or a friend.</legend>
         <div class="field">
           <label for="player1_name">Player1</label>
           <input type="text" id="player1_name" minlength="1" maxlength="20">
@@ -26,19 +26,16 @@
         <div class="field">
           <div class="checkbox_container">
             <label for="play_computer">Play Computer?</label>
-            <input type="checkbox" id="play_computer">
+            <input type="checkbox" id="play_computer" checked>
           </div>
-
           <div class="mode">
-            <label for="easy-mode" class="easy" value="" checked>Easy</label>
-            <input class="mode easy" type="radio" id="easy-mode" name="mode" checked disabled>
+            <label for="easy_mode" class="easy">Easy</label>
+            <input class="mode easy" type="radio" id="easy_mode" name="mode" value="" checked >
           </div>
-
           <div class="mode">
-            <label for="hard-mode" class="hard" value="">Hard</label>
-            <input class="mode" type="radio" id="hard-mode" name="mode" disabled>
+            <label for="hard_mode" class="hard" value="">Hard</label>
+            <input class="mode" type="radio" id="hard_mode" name="mode" value="" >
           </div>
-
         </div>
         <div class="field">
           <input type="submit" class="button button_start" value="Start Game"></input>
@@ -47,19 +44,20 @@
     </form>
   </div>
   <div class="game_container">
-    <div class="score_container">
+    <button type="button" class="button button_reset_game hidden">reset game</button>
+    <div class="score_container hidden">
       <p id="player1_name_display"></p>
-      <p id="player1_score" class="score highlighted hidden"></p>
+      <p id="player1_score" class="score"></p>
     </div>
     <div id="gameboard" class="hidden"> 
     </div>
-    <div class="score_container">
+    <div class="score_container hidden">
       <p id="player2_name_display"></p>
-      <p id="player2_score" class="score highlighted hidden"></p>
+      <p id="player2_score" class="score"></p>
     </div>
   </div>
   <p class="result hidden"></p>
-  <button type="button" class="button button_reset hidden">PLAY AGAIN</button>
+  <button type="button" class="button button_reset hidden">play again</button>
   <script src="script.js"></script>
 </body>
 
