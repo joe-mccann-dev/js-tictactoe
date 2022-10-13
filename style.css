@@ -103,11 +103,8 @@ h1 {
   background: linear-gradient(to right, var(--indigo-200), var(--yellow-200));
 }
 
-.results_container {
-   width: 100%;
-}
 .result {
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   padding: 1px;
   text-align: center;
   letter-spacing: 0.2rem;
