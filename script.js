@@ -72,9 +72,13 @@ const DisplayController = (() => {
     const player1 = gameState.players[0];
     const player2 = gameState.players[1];
     player1NameDisplay.textContent = player1.name;
-    player2NameDisplay.textContent = currentGame.state.hardMode ?
+    if (gameState.AIGame) {
+      player2NameDisplay.textContent = gameState.hardMode ?
       `${player2.name} (hard)` :
       `${player2.name} (easy)`
+    } else {
+      player2NameDisplay.textContent = player2.name;
+    }
     player1Score.classList.add('highlighted');
     player2Score.classList.add('highlighted');
     player1Score.textContent = player1.score.wins;
