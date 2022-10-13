@@ -1,15 +1,6 @@
 // modules = [Gameboard, DisplayController];
-// factories = [player, game];
+// factories = [player computerPlayer, game];
 
-// application flow:
-// DisplayController listens for input from player;
-// player clicks DOM element;
-// DisplayController updates DOM;
-// currentGame.update calls currentPlayer.markBoard;
-// Gameboard object is updated.
-
-// controls DOM manipulation
-// updates DOM and then updates the game state 
 const DisplayController = (() => {
   const boardElement = document.getElementById('gameboard');
   const resultElement = document.querySelector('.result');
@@ -208,6 +199,7 @@ const computerPlayer = (marker = 'o') => {
 
     const openSpaces = Gameboard.openSpaceCount();
     // calling minimax sets minimaxChoice within game's state object
+    // computer is always minimizing player
     currentGame.minimax(Gameboard.cells, openSpaces, false);
     const indexToMark = currentGame.state.minimaxChoice;
 
@@ -221,10 +213,6 @@ const computerPlayer = (marker = 'o') => {
   return Object.assign({}, cpu, { markBoard, smartMarkBoard });
 };
 
-// contains logic of tic tac toe
-// controls turns
-// allows players to mark board
-// determines if there is a winner or game is tied
 const game = (
   player1,
   player2,
@@ -357,7 +345,6 @@ DisplayController.playComputerCheckbox.addEventListener('click', togglePlayer2);
 let currentGame;
 DisplayController.form.addEventListener('submit', (e) => {
   e.preventDefault();
-
   DisplayController.formContainer.classList.add('hidden');
   const player1Name = DisplayController.player1Input.value || 'Player1';
   const player2Name = DisplayController.player2Input.value || 'Player2';
