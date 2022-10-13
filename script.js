@@ -160,11 +160,7 @@ const Gameboard =
         return cells;
       };
 
-      const reset = () => {
-        for (let i in cells) {
-          cells[i] = '';
-        }
-      };
+      const reset = () => cells.map((_c, index) => cells[index] = '')
 
       const openSpaceCount = () => cells.filter(c => c === '').length;
 
