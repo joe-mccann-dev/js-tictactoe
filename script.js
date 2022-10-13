@@ -8,52 +8,6 @@
 // currentGame.update calls currentPlayer.markBoard;
 // Gameboard object is updated.
 
-const Gameboard =
-  (
-    (
-      cells = [
-        '', '', '',
-        '', '', '',
-        '', '', ''
-      ]
-    ) => {
-      const winLines = [
-        [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6],
-        [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]
-      ];
-
-      const winningLine = { 'current': [] };
-
-      const lineOfThree = (marker) => {
-        return (
-          winLines.some(line => {
-            if (
-              [cells[line[0]], cells[line[1]], cells[line[2]]]
-                .every(c => c === marker)
-            ) {
-              winningLine['current'] = line;
-              return true;
-            }
-          })
-        );
-      };
-
-      const isFull = () => cells.every(c => c !== '');
-
-      const update = (marker, index) => {
-        if (cells[index] === '') { cells[index] = marker; }
-        return cells;
-      };
-
-      const reset = () => {
-        for (let i in cells) {
-          cells[i] = '';
-        }
-      };
-
-      return { cells, winningLine, update, lineOfThree, isFull, reset };
-    })();
-
 // controls DOM manipulation
 // updates DOM and then updates the game state 
 const DisplayController = (() => {
@@ -151,13 +105,80 @@ const DisplayController = (() => {
   };
 })();
 
+
+const Gameboard =
+  (
+    (
+      cells = [
+        '', '', '',
+        '', '', '',
+        '', '', ''
+      ]
+    ) => {
+      const winLines = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6],
+        [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]
+      ];
+
+      const winningLine = { 'current': [] };
+
+
+      const lineOfThree = (marker, board = cells) => {
+        return (
+          winLines.some(line => {
+            if (
+              [board[line[0]], board[line[1]], board[line[2]]]
+                .every(c => c === marker)
+            ) {
+              winningLine['current'] = line;
+              return true;
+            }
+          })
+        );
+      };
+
+      const isFull = (board = cells) => board.every(c => c !== '');
+
+      const update = (marker, index) => {
+        if (cells[index] === '') { cells[index] = marker; }
+        return cells;
+      };
+
+      const reset = () => {
+        for (let i in cells) {
+          cells[i] = '';
+        }
+      };
+
+      const openSpaceCount = () => cells.filter(c => c === '').length;
+
+      const availableIndexes = (board = cells) => {
+        const openIndexes = [];
+        for (let index = 0; index < board.length; index++) {
+          if (board[index] === '') { openIndexes.push(index); }
+        }
+        return openIndexes;
+      };
+
+      return {
+        cells,
+        winningLine,
+        update,
+        lineOfThree,
+        isFull,
+        reset,
+        openSpaceCount,
+        availableIndexes
+      };
+    })();
+
 // tells Gameboard where to mark
 const player = (marker, name) => {
   const markBoard = (index) => Gameboard.update(marker, index);
 
   const score = {
     wins: 0,
-    incrementWins: function() { return this.wins += 1; }
+    incrementWins: function () { return this.wins += 1; }
   }
 
   return { markBoard, marker, name, score };
@@ -169,25 +190,29 @@ const computerPlayer = (marker = 'o') => {
   const markBoard = () => {
     if (currentGame.state.isOver()) { return; }
 
-    const legalIndexes = _findAvailableIndexes();
+    const legalIndexes = Gameboard.availableIndexes();
     const randomIndex = _getRandomInt(legalIndexes.length);
     const indexToMark = legalIndexes[randomIndex];
     Gameboard.update(marker, indexToMark);
     DisplayController.updateDOM(indexToMark);
-  }
+  };
 
-  const _findAvailableIndexes = () => {
-    const openIndexes = [];
-    const cells = Gameboard.cells;
-    for (let index = 0; index < cells.length; index++) {
-      if (cells[index] === '') { openIndexes.push(index); }
-    }
-    return openIndexes;
+  const smartMarkBoard = () => {
+    if (currentGame.state.isOver()) { return; }
+
+    const openSpaces = Gameboard.openSpaceCount();
+    // calling minimax sets minimaxChoice within game's state object
+    currentGame.minimax(Gameboard.cells, openSpaces, false)
+    const indexToMark = currentGame.state.minimaxChoice;
+
+    Gameboard.update(marker, indexToMark);
+    DisplayController.updateDOM(indexToMark);
+    return indexToMark;
   };
 
   const _getRandomInt = (max) => Math.floor(Math.random() * max);
 
-  return Object.assign({}, cpu, { markBoard });
+  return Object.assign({}, cpu, { markBoard, smartMarkBoard });
 };
 
 // contains logic of tic tac toe
@@ -201,33 +226,29 @@ const game = (player1, player2, AI = false) => {
     currentPlayer: player1,
     result: 'draw',
     AIGame: AI,
-    isOver: function() { return this.winnerExists() || this.isTied() },
-    winnerExists: () => {
+    minimaxChoice: null,
+    isOver: function (board = Gameboard.cells) {
+      return this.winnerExists(board) || this.isTied(board)
+    },
+    winnerExists: (board = Gameboard.cells) => {
       return (
-        Gameboard.lineOfThree(player1.marker) ||
-        Gameboard.lineOfThree(player2.marker)
+        Gameboard.lineOfThree(player1.marker, board) ||
+        Gameboard.lineOfThree(player2.marker, board)
       )
     },
-    isTied: () => {
+    isTied: (board = Gameboard.cells) => {
       return Gameboard.isFull() &&
         (
-          !Gameboard.lineOfThree(player1.marker) &&
-          !Gameboard.lineOfThree(player2.marker)
+          !Gameboard.lineOfThree(player1.marker, board) &&
+          !Gameboard.lineOfThree(player2.marker, board)
         );
     },
-  };
-
-  const currentPlayerMarker = () => state.currentPlayer.marker;
-
-  const update = (index) => {
-    AI ? _playComputer(index) : _playHuman(index);
-    if (state.isOver()) { _performEndGameTasks(state); }
   };
 
   const _playComputer = (index) => {
     player1.markBoard(index);
     _toggleCurrentPlayer(player1);
-    player2.markBoard();
+    player2.smartMarkBoard();
     _toggleCurrentPlayer(player2);
   };
 
@@ -255,8 +276,57 @@ const game = (player1, player2, AI = false) => {
     return state.currentPlayer = current === player1 ? player2 : player1;
   };
 
+  const _evaluateBoard = (board) => {
+    if (Gameboard.lineOfThree(player1.marker, board)) { return 1; }
+    if (Gameboard.lineOfThree(player2.marker, board)) { return -1;}
+    return 0;
+  };
+
+  const _nextBoardState = (board, move, marker) => {
+    boardCopy = board.map(m => m);
+    boardCopy[move] = marker;
+    return boardCopy;
+  };
+
+  const minimax = (board, depth, maximizingPlayer) => {
+    if (depth === 0 || state.isOver(board)) { return _evaluateBoard(board) }
+
+    const scores = [];
+    const moves = [];
+    const availableMoves = Gameboard.availableIndexes(board);
+
+    const gatherScoresForMoves = (marker, maximizingPlayer) => {
+      availableMoves.forEach(move => {
+        const potentialBoard = _nextBoardState(board, move, marker);
+        const minimaxResult = minimax(potentialBoard, depth - 1, maximizingPlayer);
+        scores.push(minimaxResult);
+        moves.push(move)
+      });
+    };
+
+    if (maximizingPlayer) {
+      gatherScoresForMoves('x', false);
+      const maxScoreIndex = scores.indexOf(Math.max(...scores));
+      state.minimaxChoice = moves[maxScoreIndex];
+      return scores[maxScoreIndex];
+    } else {
+      gatherScoresForMoves('o', true)
+      const minScoreIndex = scores.indexOf(Math.min(...scores));
+      state.minimaxChoice = moves[minScoreIndex];
+      return scores[minScoreIndex];
+    }
+  };
+
+  const currentPlayerMarker = () => state.currentPlayer.marker;
+
+  const update = (index) => {
+    AI ? _playComputer(index) : _playHuman(index);
+    if (state.isOver()) { _performEndGameTasks(state); }
+  };
+
   return {
     update,
+    minimax,
     currentPlayerMarker,
     state,
   };
