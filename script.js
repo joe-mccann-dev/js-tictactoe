@@ -137,8 +137,7 @@ const Gameboard =
         [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]
       ];
 
-      const winningLine = { 'current': [] };
-
+      const winningLine = { current: [] };
 
       const lineOfThree = (marker, board = cells) => {
         return (
@@ -147,7 +146,7 @@ const Gameboard =
               [board[line[0]], board[line[1]], board[line[2]]]
                 .every(c => c === marker)
             ) {
-              winningLine['current'] = line;
+              winningLine.current = line;
               return true;
             }
           })
