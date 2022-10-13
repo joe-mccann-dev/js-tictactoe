@@ -10,6 +10,8 @@
   --indigo-600: #4f46e5;
   --yellow-200: #fef08a;
   --yellow-600: #ca8a04;
+  --red-600: #dc2626;
+  --green-600: #16a34a;
 }
 
 html {
@@ -99,9 +101,24 @@ fieldset {
   gap: 4px;
 }
 
-.play_computer {
-  flex-direction: row;
+.checkbox_container {
+  display: flex;
   align-items: center;
+  justify-content: space-between;
+}
+
+.mode {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.easy {
+  color: var(--green-600);
+}
+
+.hard {
+  color: var(--red-600);
 }
 
 input[type="text"] {
@@ -116,8 +133,8 @@ input[type="checkbox"] {
 }
 
 input[type='radio'] { 
-  margin-top: 6px;
-  transform: scale(1.4); 
+  transform: scale(1.2);
+  margin-right: 6px;
 }
 
 
