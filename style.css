@@ -187,8 +187,7 @@ input[type='radio'] {
 }
 
 .button:hover {
-  transform: scale(1.1);
-  transition: .1s;
+  background: linear-gradient(to right, var(--yellow-600), var(--indigo-600) );
 }
 
 .results {
