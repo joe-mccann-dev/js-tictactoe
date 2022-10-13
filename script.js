@@ -196,13 +196,12 @@ const computerPlayer = (marker = 'o') => {
 
   const smartMarkBoard = () => {
     if (currentGame.state.isOver()) { return; }
-
+    
     const openSpaces = Gameboard.openSpaceCount();
     // calling minimax sets minimaxChoice within game's state object
     // computer is always minimizing player
     currentGame.minimax(Gameboard.cells, openSpaces, false);
     const indexToMark = currentGame.state.minimaxChoice;
-
     Gameboard.update(marker, indexToMark);
     DisplayController.updateDOM(indexToMark);
     return indexToMark;
