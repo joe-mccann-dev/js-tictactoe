@@ -201,8 +201,9 @@ const computerPlayer = (marker = 'o') => {
     if (currentGame.state.isOver()) { return; }
 
     const openSpaces = Gameboard.openSpaceCount();
+    // calling minimax sets minimaxChoice within game's state object
     currentGame.minimax(Gameboard.cells, openSpaces, false)
-    const indexToMark = currentGame.state.minimaxChoice
+    const indexToMark = currentGame.state.minimaxChoice;
 
     Gameboard.update(marker, indexToMark);
     DisplayController.updateDOM(indexToMark);
@@ -244,53 +245,6 @@ const game = (player1, player2, AI = false) => {
     },
   };
 
-  const currentPlayerMarker = () => state.currentPlayer.marker;
-
-  const update = (index) => {
-    AI ? _playComputer(index) : _playHuman(index);
-    if (state.isOver()) { _performEndGameTasks(state); }
-  };
-
-  const evaluateBoard = (board) => {
-    if (Gameboard.lineOfThree(player1.marker, board)) { return 1; }
-    if (Gameboard.lineOfThree(player2.marker, board)) { return -1;}
-    return 0;
-  };
-
-  const minimax = (board, depth, maximizingPlayer) => {
-    if (depth === 0 || state.isOver(board)) { return evaluateBoard(board) }
-
-    const scores = [];
-    const moves = [];
-    const availableMoves = Gameboard.availableIndexes(board);
-
-    const gatherScoresForMoves = (marker, maximizingPlayer) => {
-      availableMoves.forEach(move => {
-        const potentialBoard = _nextBoardState(board, move, marker);
-        scores.push(minimax(potentialBoard, depth - 1, maximizingPlayer));
-        moves.push(move)
-      });
-    };
-
-    if (maximizingPlayer) {
-      gatherScoresForMoves('x', false);
-      const maxScoreIndex = scores.indexOf(Math.max(...scores));
-      state.minimaxChoice = moves[maxScoreIndex];
-      return scores[maxScoreIndex];
-    } else {
-      gatherScoresForMoves('o', true)
-      const minScoreIndex = scores.indexOf(Math.min(...scores));
-      state.minimaxChoice = moves[minScoreIndex];
-      return scores[minScoreIndex];
-    }
-  };
-
-  const _nextBoardState = (board, move, marker) => {
-    boardCopy = board.map(m => m);
-    boardCopy[move] = marker;
-    return boardCopy;
-  };
-
   const _playComputer = (index) => {
     player1.markBoard(index);
     _toggleCurrentPlayer(player1);
@@ -322,9 +276,56 @@ const game = (player1, player2, AI = false) => {
     return state.currentPlayer = current === player1 ? player2 : player1;
   };
 
+  const _evaluateBoard = (board) => {
+    if (Gameboard.lineOfThree(player1.marker, board)) { return 1; }
+    if (Gameboard.lineOfThree(player2.marker, board)) { return -1;}
+    return 0;
+  };
+
+  const _nextBoardState = (board, move, marker) => {
+    boardCopy = board.map(m => m);
+    boardCopy[move] = marker;
+    return boardCopy;
+  };
+
+  const minimax = (board, depth, maximizingPlayer) => {
+    if (depth === 0 || state.isOver(board)) { return _evaluateBoard(board) }
+
+    const scores = [];
+    const moves = [];
+    const availableMoves = Gameboard.availableIndexes(board);
+
+    const gatherScoresForMoves = (marker, maximizingPlayer) => {
+      availableMoves.forEach(move => {
+        const potentialBoard = _nextBoardState(board, move, marker);
+        const minimaxResult = minimax(potentialBoard, depth - 1, maximizingPlayer);
+        scores.push(minimaxResult);
+        moves.push(move)
+      });
+    };
+
+    if (maximizingPlayer) {
+      gatherScoresForMoves('x', false);
+      const maxScoreIndex = scores.indexOf(Math.max(...scores));
+      state.minimaxChoice = moves[maxScoreIndex];
+      return scores[maxScoreIndex];
+    } else {
+      gatherScoresForMoves('o', true)
+      const minScoreIndex = scores.indexOf(Math.min(...scores));
+      state.minimaxChoice = moves[minScoreIndex];
+      return scores[minScoreIndex];
+    }
+  };
+
+  const currentPlayerMarker = () => state.currentPlayer.marker;
+
+  const update = (index) => {
+    AI ? _playComputer(index) : _playHuman(index);
+    if (state.isOver()) { _performEndGameTasks(state); }
+  };
+
   return {
     update,
-    evaluateBoard,
     minimax,
     currentPlayerMarker,
     state,
