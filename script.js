@@ -74,8 +74,8 @@ const DisplayController = (() => {
     player1NameDisplay.textContent = player1.name;
     if (gameState.AIGame) {
       player2NameDisplay.textContent = gameState.hardMode ?
-      `${player2.name} (hard)` :
-      `${player2.name} (easy)`
+        `${player2.name} (hard)` :
+        `${player2.name} (easy)`
     } else {
       player2NameDisplay.textContent = player2.name;
     }
@@ -218,7 +218,7 @@ const computerPlayer = (marker = 'o') => {
 
     const openSpaces = Gameboard.openSpaceCount();
     // calling minimax sets minimaxChoice within game's state object
-    currentGame.minimax(Gameboard.cells, openSpaces, false)
+    currentGame.minimax(Gameboard.cells, openSpaces, false);
     const indexToMark = currentGame.state.minimaxChoice;
 
     Gameboard.update(marker, indexToMark);
@@ -235,7 +235,12 @@ const computerPlayer = (marker = 'o') => {
 // controls turns
 // allows players to mark board
 // determines if there is a winner or game is tied
-const game = (player1, player2, AI = false, hardMode = false) => {
+const game = (
+  player1,
+  player2,
+  AI = false,
+  hardMode = false
+) => {
 
   const state = {
     players: [player1, player2],
@@ -265,17 +270,23 @@ const game = (player1, player2, AI = false, hardMode = false) => {
   const _playComputer = (index) => {
     player1.markBoard(index);
     _toggleCurrentPlayer(player1);
-    hardMode ? player2.smartMarkBoard() : player2.markBoard();
-    _toggleCurrentPlayer(player2);
+    setTimeout(() => {
+      hardMode ? player2.smartMarkBoard() : player2.markBoard();
+      _toggleCurrentPlayer(player2);
+      _performEndGameTasks(state);
+    }, 150)
   };
 
   const _playHuman = (index) => {
     const player = state.currentPlayer;
     player.markBoard(index);
     _toggleCurrentPlayer(player);
+    _performEndGameTasks(state);
   };
 
   const _performEndGameTasks = (state) => {
+    if (!state.isOver()) { return; }
+
     if (state.winnerExists()) { _declareWinner(state); }
     DisplayController.showGameResult(state.result);
   };
@@ -336,10 +347,7 @@ const game = (player1, player2, AI = false, hardMode = false) => {
 
   const currentPlayerMarker = () => state.currentPlayer.marker;
 
-  const update = (index) => {
-    AI ? _playComputer(index) : _playHuman(index);
-    if (state.isOver()) { _performEndGameTasks(state); }
-  };
+  const update = (index) => { AI ? _playComputer(index) : _playHuman(index); }
 
   return {
     update,
