@@ -19,7 +19,7 @@ I decided to keep important information within the game factory's `state` object
 
 ### Getting minimax function to align with an optimal move
 
-[My implementation of minimax](https://github.com/joe-mccann-dev/js-tictactoe/blob/main/script.js#L319)
+[My implementation of minimax](https://github.com/joe-mccann-dev/js-tictactoe/blob/main/script.js#L292)
 
 This was the most challenging aspect of this project. I found that I could easily enough replace the pseudocode for the algorithm found on [Wikipedia](https://en.wikipedia.org/wiki/Minimax) with JavaScript, and I could get it to return a heuristic value of 1, -1, or 0. However, associating that value with the optimal move proved challenging. 
 
